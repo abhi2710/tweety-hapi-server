@@ -1,0 +1,6 @@
+.idea/
+node_modules/
+bin/
+public/
+views/
+*.DS_Store
