@@ -2,8 +2,7 @@
  * Created by abhinav on 1/25/2016.
  */
 'use strict';
-var dao=require('./DAO'),
-    Routes = require('./routes'),
+var Routes = require('./routes'),
     Plugins = require('./Plugins'),
     mongoose=require('mongoose');
 const Hapi = require('hapi'),
@@ -24,7 +23,6 @@ mongoose.connect('mongodb://localhost/Tweetydb');
 mongoose.connection.once('connected', function() {
     console.log("Connected to database Tweetydb")
 });
-
 server.route({
     method: '*',
     path: '/',
@@ -35,7 +33,6 @@ server.route({
 Routes.forEach(function (api) {
     server.route(api);
 });
-
 server.start((err) => {
 
     if (err) {

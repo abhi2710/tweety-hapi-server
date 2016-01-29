@@ -9,8 +9,10 @@ var async=require('Async'),
     algorithm = 'aes-256-ctr',
     models=require('../models'),
     dao=require('../DAO'),
-    flag=0,
-    privateKey = Config.key.REGISTERPRIVATEKEY;
+    util=require('../util'),
+    privateKey = Config.key.REGISTERPRIVATEKEY,
+    Constants=require('../Config/Constants'),
+    CONSTANTS=Constants.ROUTECONSTANTS;
 
 var smtpTransport = nodemailer.createTransport("SMTP", {
     service: "Gmail",
@@ -20,24 +22,19 @@ var smtpTransport = nodemailer.createTransport("SMTP", {
     }
 });
 
-var decrypt = function(password) {
-    return decrypt(password);
-};
-
-var encrypt = function(password) {
-    return encrypt(password);
-};
-
 var sentMailVerificationLink = function(email,token) {
     var from = Config.email.accountName+" Team<" + Config.email.username + ">";
     var mailbody = "<p>Thanks for Registering on "+"Tweety"+" </p><p>Please verify your email by clicking on the verification link below.<br/><a href='http://"+"localhost"+":"+"8500"+"/"+"verifyEmail"+"/"+token+"'>Verification Link</a></p>"
     mail(from, email , "Account Verification", mailbody);
 };
 
-exports.sentMailForgotPassword = function(user) {
+exports.sentMailForgotPassword = function(user,callback) {
     var from = Config.email.accountName+" Team<" + Config.email.username + ">";
     var mailbody = "<p>Your "+Config.email.accountName+"  Account Credential</p><p>username : "+user.userName+" , password : "+decrypt(user.password)+"</p>"
-    mail(from, user.userName , "Account password", mailbody);
+    mail(from, user.userName , "Account password", mailbody,function(err,response){
+        console.log("forgot password "+response);
+        return callback(err,response);
+    });
 };
 
 // method to decrypt data(password)
@@ -50,13 +47,13 @@ function decrypt(password) {
 
 // method to encrypt data(password)
 function encrypt(password) {
-    var cipher = crypto.createCipher(algorithm, privateKey);
+    var cipher = crypto.createCipher('aes-256-ctr', privateKey);
     var crypted = cipher.update(password, 'utf8', 'hex');
     crypted += cipher.final('hex');
     return crypted;
 }
 
-function mail(from, email, subject, mailbody){
+function mail(from, email, subject, mailbody,callback){
     var mailOptions = {
         from: from, // sender address
         to: email, // list of receivers
@@ -65,40 +62,30 @@ function mail(from, email, subject, mailbody){
         html: mailbody  // html body
     };
 
-    smtpTransport.sendMail(mailOptions, function(error, response) {
-        if (error) {
-            console.error(error);
-        }
-        smtpTransport.close(); // shut down the connection pool, no more messages
-    });
+    smtpTransport.sendMail(mailOptions)
+            smtpTransport.close(); /// / shut down the connection pool, no more messages
 }
 function isAuth(recievedToken,callback){
     async.waterfall([function (callback) {
-        try {
-            var decode = Jwt.decode(recievedToken)
-        }
-        catch (err) {
-            console.log(err);
-            callback(err, null);
-            return;
-        }
-        callback(null,decode)
+        //try {
+            var decode = Jwt.decode(recievedToken);
+        //}
+        //catch (err) {
+        //    callback(err, null);
+        //    return;
+        //}
+        callback(null,decode.userId)
     },
-        function (decode, callback) {
-            userId=decode.userId;
-            dao.userDao.getAccessToken(userId,function(err,token){
-                callback(null, token);
+        function (userId, callback) {
+            dao.userDao.getAccessToken(userId,function(err,tokens){
+                callback(null, tokens);
             });
         },
-        function (token, callback) {
-            if (token === recievedToken) {
-                var valid = 1;
-            } else if(token===-1) {
-                var valid=-1
-            }
-            else{
-                var valid=0;
-            }
+        function (tokens, callback) {
+           var valid=false;
+                if (tokens === recievedToken) {
+                    valid = true;
+                }
             callback(null, valid)
         }
     ], function (err, valid) {
@@ -113,47 +100,49 @@ function isAuth(recievedToken,callback){
 var verify=function(recievedToken,callback){
     var username;
     async.waterfall([function (callback) {
-        try {
-            var decode = Jwt.decode(recievedToken)
+        try{var decode = Jwt.decode(recievedToken);}
+        catch(err) {
+            return callback(err)
         }
-        catch (err) {
-            console.log(err);
-            callback(err, null);
-            return;
-        }
-        callback(null,decode.username);
+        dao.userDao.getUserId(decode.username,function(err,userId) {
+            callback(err,userId);
+        });
     },
-        function (username,callback) {
-            dao.userDao.getUserId(username,function(err,userId){
-                dao.tokenDao.getToken(userId,function(err,token){
-                    callback(null,token,userId);
-                });
+        function (userId,callback) {
+            dao.tokenDao.getToken(userId,function(err,token){
+                callback(err,token,userId);
             });
         },
         function (token,userId,callback) {
-            if (token===recievedToken)
-                callback(null,true,userId)
-             else callback(null, false,userId)
+            if (token===recievedToken) {
+                dao.userDao.setUserVerified(userId,function(err,result){
+                        callback(err,result)
+                });
+            }
+            else callback(err,null)
         }
-    ], function (err, isValid,userId) {
-        if (err) {
+    ], function (err,result) {
+        if(err) {
             console.log(err);
+            return callback(null,util.createErrorResponseMessage(err));
         }
-        if(isValid) {
-            dao.userDao.setUserVerified(userId);
-            dao.followDao.initiatefollow({userId:userId},function(err,isInitiated){if(err)
-            console.log(err);
-            })
+        else {
+            return callback(null,util.createSuccessResponseMessage(CONSTANTS.VERIFYEMAIL));
         }
-        return callback(null,isValid);
     });
 };
 
+var Decrypt=function(password,callback){
+    return callback(null,decrypt(password));
+};
 
+var Encrypt=function(password,callback){
+    return callback(null,encrypt(password));
+};
 module.exports={
     verify:verify,
     sentMailVerificationLink:sentMailVerificationLink,
     isAuth:isAuth,
-    encrypt:encrypt,
-    decrypt:decrypt
+    Encrypt:Encrypt,
+    Decrypt:Decrypt
 };

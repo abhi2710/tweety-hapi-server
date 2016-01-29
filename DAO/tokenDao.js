@@ -6,21 +6,21 @@ var async=require('Async'),
     DAOmanager=require('./DAOmanager');
 
 var getToken=function(userId,callback){
-    console.log(userId);
     DAOmanager.getData(models.registerTokens,{userId:userId},{},function(err,document){
+        if(err)
+        return callback(err)
         return callback(null,document.token);
-    });
-}
-
-var setToken=function(token,userId,callback){
-    DAOmanager.setData (models.registerTokens,{token:token,userId:userId},function (err,isTokenset) {
-        if (err) {
-             console.error(err);
-        }
-        return callback(err,isTokenset)
     });
 };
 
+var setToken=function(token,userId,callback){
+    DAOmanager.setData (models.registerTokens,{token:token,userId:userId},function (err,result) {
+        if (err) {
+            return callback(err)
+        }
+        return callback(null,result);
+    });
+};
 
 module.exports={
     getToken:getToken,

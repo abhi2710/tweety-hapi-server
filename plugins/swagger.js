@@ -6,7 +6,8 @@ var pack = require('../package'),
         info: {
             'title': 'TWEETY',
             'version': pack.version,
-        }
+        },
+        'payloadType': "form"
     };
 exports.register = function(server, options, next){
 

@@ -3,5 +3,6 @@
  */
 module.exports = {
     CONSTANTS: require('./Constants'),
-    Email:require('./email')
+    Email:require('./email'),
+    responseMessages:require('./responseMessages')
 };

@@ -2,26 +2,15 @@
  * Created by abhinav on 1/25/2016.
  */
 var Joi=require('joi'),
-    controller = require('../../Controllers/index'),
-    message,body;
+    controller = require('../../Controllers/index');
 
 var Register={
     method: 'POST',
     path:'/register',
     handler: function (request, reply) {
-        controller.userRegisterController.register(request.payload.email,request.payload.username,request.payload.firstname,request.payload.lastname,
-            request.payload.password,request.payload.phone,function(err,isRegistered){
-                if(isRegistered===true)
-                    reply({
-                        message:"user registered!",
-                        body:"please verify your account with the email sent to:" + request.payload.email
-                    });
-                else {
-                    reply({
-                        message: "NOT REGISTERED!",
-                        body: "username/email already exists! please re-check your details!!"
-                    });
-                }
+        controller.userController.register(request.payload.email,request.payload.username,request.payload.firstname,request.payload.lastname,
+            request.payload.password,request.payload.phone,function(err,result){
+                reply(result.response).code(result.statusCode);
             });
     },
     config: {
@@ -30,7 +19,7 @@ var Register={
         tags: ['api'],
         validate: {
             payload: {
-                email:Joi.string().required(),
+                email:Joi.string().email().required(),
                 username:Joi.string().required().alphanum().min(3).max(15),
                 firstname:Joi.string().required(),
                 lastname:Joi.string().required(),
@@ -45,13 +34,9 @@ var verifyEmail={
     method: 'GET',
     path:'/verifyEmail/{token}',
     handler: function (request, reply) {
-        controller.verificationController.verify(request.params.token,function(err,isValid){
-            if (isValid===true) {
-                reply("Account verified!Please Login to Continue "+"<a href=http://localhost:8500/documentation#!/login/login>LOGIN</a>");
-            }
-            else {
-                reply("Account not verified!!");
-            }
+        controller.verificationController.verify(request.params.token,function(err,result){
+            reply(result.response).code(result.statusCode);
+
         });
     },
     config: {

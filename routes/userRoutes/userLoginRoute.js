@@ -10,28 +10,9 @@ var Login={
     method: 'POST',
     path:'/login',
     handler: function (request, reply) {
-        controller.userLoginController.Login(request.payload.username,
-            request.payload.password,function(err,Loginobj){
-                if(Loginobj.status===1)
-                {
-                    message="Login successful";
-                    body="token is "+Loginobj.token;
-                }
-                else if(Loginobj.status===-1)
-                {
-                    message="You are not registered";
-                    body="";
-                }
-                else{
-                    message="Incorrect Username/Password";
-                    body="";
-                }
-                reply(
-                    {
-                        message:message,
-                        body:body
-                    }
-                ).header("authorization",Loginobj.token);
+        controller.userController.Login(request.payload.username,
+            request.payload.password,function(err,result,token){
+                reply(result.response.message).header("authorization",token).code(result.statusCode);
             });
     },
     config: {
@@ -41,7 +22,7 @@ var Login={
         validate: {
             payload: {
                 username:Joi.string().required(),
-                password:Joi.string().required(),
+                password:Joi.string().required()
             }
         }
     }
@@ -51,12 +32,8 @@ var Logout={
     method: 'DELETE',
     path:'/logout',
     handler: function (request, reply) {
-        controller.userLoginController.Logout(request.headers.authorization,function(err,isLoggedOut) {
-            if(isLoggedOut===1)
-                reply("you are now logged out!");
-            else{
-                reply("Failed");
-            }
+        controller.userController.Logout(request.headers.authorization,function(err,result) {
+           reply(result.response.message).code(result.statusCode);
         });
     },
     config: {

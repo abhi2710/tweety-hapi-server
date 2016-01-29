@@ -11,23 +11,11 @@ exports.getData = function (model, query, projection, options, callback) {
     model.findOne(query, projection, options, function (err, data) {
         if (err) {
             logger.error("Get Data", err);
-            return callback(null,false);
+            return callback(err,false);
         }
         return callback(null, data);
     });
 };
-
-exports.getDatum = function (model, query, projection, options, callback) {
-
-    model.find(query, projection, options, function (err, data) {
-        if (err) {
-            logger.error("Get Data", err);
-            return callback(err);
-        }
-        return callback(null, data);
-    });
-};
-
 /*
  ----------------------------------------
  AGGREGATE DATA
@@ -56,12 +44,12 @@ exports.setData = function (model, data, callback) {
 
         if (err) {
             logger.error("SET DATA: ", err);
-            return callback(err,false);
+            return callback(err,null);
         }
           else {
             var result = resultData.toObject();
             delete result.__v;
-           return callback(null,true);
+           return callback(null,result);
         }
     });
 };
@@ -78,9 +66,9 @@ exports.deleteData = function (model, conditions, callback) {
 
         if (err) {
             logger.error("Delete Data", err);
-            return callback(err,false);
+            return callback(err,removed);
         }
-        return callback(null,true);
+        return callback(null,removed);
     });
 };
 
@@ -125,7 +113,7 @@ exports.update = function (model, conditions, update, options, callback) {
             return callback(err);
         }
         logger.trace("Update Result: ", JSON.stringify(result));
-        return callback(null,true);
+        return callback(null,result);
 
     });
 };

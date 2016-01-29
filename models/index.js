@@ -4,6 +4,5 @@
 module.exports={
     users:require('./userModel'),
     registerTokens:require('./tokenModel'),
-    follow:require('./followModel'),
-    tweet:require('./tweetModel'),
+    tweet:require('./tweetModel')
 };

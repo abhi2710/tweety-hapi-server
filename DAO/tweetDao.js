@@ -3,18 +3,14 @@
  */
 var models=require('../models'),
     DAOmanager=require('../DAO/DAOmanager');
-var id=12;
 var addTweet=function(userId,tweet,callback) {
     var data={
         userId:userId,
-        tweet_id:id++,
         tweet_text:tweet,
         time:new Date(new Date()).toISOString()
     };
-    DAOmanager.setData(models.tweet,data,function (err,flag) {
-        if (err) return console.error(err);
-        console.log("TWEET ADDED");
-        return callback(err,flag);
+    DAOmanager.setData(models.tweet,data,function (err,doc) {
+        return callback(err,doc.tweet_text);
     });
 };
 
@@ -22,7 +18,7 @@ var getTweets=function(followers,callback) {
     DAOmanager.getDataWithReference(models.tweet, {userId:{$in:followers}},{}, {},{
         path: 'userId',
         select: 'username firstname lastname',
-        options: { lean:true }
+        options: { lean:true,sort:{time:-1} }
     },function (err,data) {
         if (err) return console.error(err);
         var tweetsArr=[];

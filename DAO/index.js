@@ -5,6 +5,5 @@ module.exports={
     DAOmanager:require('./DAOmanager'),
     userDao:require('./userDao'),
     tokenDao:require('./tokenDao'),
-    tweetDao:require('./tweetDao'),
-    followDao:require('./followDao')
+    tweetDao:require('./tweetDao')
 };
