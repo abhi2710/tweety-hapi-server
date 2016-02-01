@@ -16,6 +16,18 @@ exports.getData = function (model, query, projection, options, callback) {
         return callback(null, data);
     });
 };
+exports.getallData = function (model, query, projection, options, callback) {
+
+    model.find(query, projection, options, function (err, data) {
+        if (err) {
+            logger.error("Get Data", err);
+            return callback(err,false);
+        }
+        return callback(null, data);
+    });
+};
+
+
 /*
  ----------------------------------------
  AGGREGATE DATA

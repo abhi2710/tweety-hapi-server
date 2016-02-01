@@ -3,23 +3,20 @@
  */
 var async=require('Async'),
     models=require('../models'),
-    DAOmanager=require('./DAOmanager');
+    DAOmanager=require('./DAOmanager'),
+    Constants=require('../Config/Constants'),
+    errors=Constants.ERRORS;
 
 var getToken=function(userId,callback){
     DAOmanager.getData(models.registerTokens,{userId:userId},{},function(err,document){
-        if(err)
-        return callback(err)
+        if(document)
         return callback(null,document.token);
+        else return callback(new Error(errors.BAD_REQUEST),null);
     });
 };
 
 var setToken=function(token,userId,callback){
-    DAOmanager.setData (models.registerTokens,{token:token,userId:userId},function (err,result) {
-        if (err) {
-            return callback(err)
-        }
-        return callback(null,result);
-    });
+    DAOmanager.setData (models.registerTokens,{token:token,userId:userId},callback);
 };
 
 module.exports={

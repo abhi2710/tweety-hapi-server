@@ -1,103 +1,60 @@
 /**
  * Created by abhinav on 1/29/2016.
  */
-var verify=require('./verificationController'),
+var verify = require('./verificationController'),
     Jwt = require('jsonwebtoken'),
-    Constants=require('../Config/Constants'),
-    dao=require('../DAO'),
-    util=require('../util'),
-    async=require('Async'),
+    Constants = require('../Config/Constants'),
+    dao = require('../DAO'),
+    util = require('../util'),
+    async = require('async'),
     privateKey = Constants.KEYS.REGISTERPRIVATEKEY,
-    CONSTANTS=Constants.ROUTECONSTANTS;
-
-var unFollow=function(token,followUsername,callback) {
-    async.waterfall([
-        function(callback) {
-            try {
-                var decode = Jwt.decode(token);
-            }
-            catch(err) {
-                callback(err,null);
-            }
-            callback(null,decode.userId);
-        },
-        function(userId,callback){
-            if(userId)
-                dao.userDao.getUserId(followUsername,function(err,followUserId) {
-                    if (followUserId)
-                        async.parallel([function (callback) {
-                                dao.userDao.removefromFollowers(userId, followUserId, function (err,isRemoved) {
-                                    callback(err,isRemoved);
-                                });
-                            },
-                                function (callback) {
-                                    dao.userDao.removefromFollowing(userId,followUserId, function (err, isRemoved) {
-                                        callback(err,isRemoved);
-                                    });
-                                }],
-                            function (err, results) {
-                                if (results[0] && results[1]) {
-                                    return callback(err, true);
-                                }
-                                else
-                                return callback(new Error("alreadyunfollowed"), false)
-                            });
-                    else callback(null,false)
-                });
-            else callback(null,false)
-        }
-    ],function(err,result) {
-        if (err) {
-            return callback(null, util.createErrorResponseMessage(err,result));
-        }
-        else {
-            return callback(null, util.createSuccessResponseMessage(CONSTANTS.UNFOLLOW,result));
-        }
-    });
-};
+    CONSTANTS = Constants.ROUTECONSTANTS,
+    errors=Constants.ERRORS;
 
 var startFollowing=function(token,followUsername,callback) {
     async.waterfall([
         function(callback) {
-            try {
-                var decode = Jwt.decode(token);
-            }
-            catch(err) {
-                callback(err,null);
-            }
-            callback(null,decode.userId);
+            verify.isAuth(token,function(err,isAuthorized) {
+                if (isAuthorized) {
+                    try {
+                        var decode = Jwt.decode(token);
+                        callback(null, decode.userId);
+                    }
+                    catch (err) {
+                        callback(new Error(errors.INVALID_TOKEN), null);
+                    }
+                }
+                else
+                    callback(new Error(errors.NOT_AUTHORIZED), null);
+            });
         },
         function(userId,callback){
             if(userId)
                 dao.userDao.getUserId(followUsername,function(err,followUserId) {
                     if (followUserId)
                         async.parallel([function (callback) {
-                                dao.userDao.addtoFollowers(userId, followUserId, function (err,isAdded) {
-                                    callback(err,isAdded);
-                                });
+                                dao.userDao.addtoFollowers(userId, followUserId,callback);
                             },
                                 function (callback) {
-                                    dao.userDao.addtoFollowing(userId,followUserId, function (err, isAdded) {
-                                        callback(err,isAdded);
-                                    });
+                                    dao.userDao.addtoFollowing(userId,followUserId,callback);
                                 }],
                             function (err, results) {
-                                if (results[0] && results[1]) {
+                                if (results[0]===1 && results[1]===1) {
                                     return callback(err, true);
                                 }
                                 else
-                                return callback(new Error("alreadyfollowed"), false)
+                                    return callback(new Error(errors.ALREADY_FOLLOWED), false)
                             });
-                    else callback(new Error('invalidusername'),false)
+                    else callback(new Error(errors.INVALID_USERNAME),false)
                 });
-            else callback(new Error('invalidtoken'),false)
+            else callback(new Error(errors.INVALID_TOKEN),false)
         }
     ],function(err) {
         if (err) {
             return callback(null, util.createErrorResponseMessage(err));
         }
         else {
-            return callback(null, util.createSuccessResponseMessage(CONSTANTS.FOLLOW));
+            return callback(null, util.createSuccessResponseMessage(CONSTANTS.UNFOLLOW));
         }
     });
 };
@@ -105,38 +62,40 @@ var startFollowing=function(token,followUsername,callback) {
 var stopFollowing=function(token,followUsername,callback) {
     async.waterfall([
         function(callback) {
-            try {
-                var decode = Jwt.decode(token);
-            }
-            catch(err) {
-                callback(err,null);
-            }
-            callback(null,decode.userId);
+            verify.isAuth(token,function(err,isAuthorized) {
+                if(isAuthorized) {
+                    try {
+                        var decode = Jwt.decode(token);
+                        callback(null,decode.userId);
+                    }
+                    catch (err) {
+                        callback(new Error(errors.INVALID_TOKEN), null);
+                    }
+                }
+                else
+                    callback(new Error(errors.NOT_AUTHORIZED), null);
+            });
         },
         function(userId,callback){
             if(userId)
                 dao.userDao.getUserId(followUsername,function(err,followUserId) {
                     if (followUserId)
                         async.parallel([function (callback) {
-                                dao.userDao.removefromFollowers(userId, followUserId, function (err,isAdded) {
-                                    callback(err,isAdded);
-                                });
+                                dao.userDao.removefromFollowers(userId, followUserId,callback);
                             },
                                 function (callback) {
-                                    dao.userDao.removefromFollowing(userId,followUserId, function (err, isAdded) {
-                                        callback(err,isAdded);
-                                    });
+                                    dao.userDao.removefromFollowing(userId,followUserId,callback);
                                 }],
                             function (err, results) {
-                                if (results[0] && results[1]) {
+                                if (results[0]===1 && results[1]===1) {
                                     return callback(err, true);
                                 }
                                 else
-                                    return callback(new Error("alreadyUnfollowed"), false)
+                                    return callback(new Error(errors.ALREADY_UNFOLLOWED), false)
                             });
-                    else callback(new Error('invalidusername'),false)
+                    else callback(new Error(errors.INVALID_USERNAME),false)
                 });
-            else callback(new Error('invalidtoken'),false)
+            else callback(new Error(errors.INVALID_TOKEN),false)
         }
     ],function(err) {
         if (err) {
@@ -151,29 +110,20 @@ var stopFollowing=function(token,followUsername,callback) {
 var Login=function(username,password,callback){
     async.waterfall([
         function(callback){
-            dao.userDao.isRegistered(username,function(err,isregistered){
-                callback(err,isregistered)
-            });
+            dao.userDao.isRegistered(username,callback);
         },
         function(isregistered,callback){
-            if(isregistered===true) {
-                dao.userDao.getPassword(username, function (err, password) {
-                    callback(err, password);
-                });
-            }
-            else{
-                callback(new Error('usernotverified'),null);
-            }
+            if(isregistered===true)
+                dao.userDao.getPassword(username,callback);
+            else
+                callback(new Error(errors.USER_NOT_VERIFIED),null);
         },
         function(pass,callback) {
             if (password === pass) {
-                dao.userDao.getUserId(username,function(err,userId){
-                    console.log(userId);
-                    callback(err,userId)
-                })
+                dao.userDao.getUserId(username,callback)
             }
             else
-                callback(null,null)
+                callback(new Error(errors.INVALID_CREDENTIALS),null)
         },
         function(userId,callback) {
             if(userId) {
@@ -182,11 +132,10 @@ var Login=function(username,password,callback){
                     return callback(err, token);
                 });
             }
-            else callback(null,null);
+            else callback(new Error(errors.SOMETHING_WENT_WRONG),null);
         }
     ],function(err,token) {
         if(err) {
-            console.log(err.message);
             return callback(null,util.createErrorResponseMessage(err));
         }
         else {
@@ -195,14 +144,20 @@ var Login=function(username,password,callback){
     });
 };
 var Logout=function(token,callback){
-    dao.userDao.setAccessToken((Jwt.decode(token)).userId,0,function(err){
-        if(err) {
-            console.log(err);
-            return callback(null,util.createErrorResponseMessage(err));
+    verify.isAuth(token,function(err,isAuthorized) {
+        if (isAuthorized) {
+            dao.userDao.setAccessToken((Jwt.decode(token)).userId,0,function(err){
+                if(err) {
+                    console.log(err);
+                    return callback(null,util.createErrorResponseMessage(err));
+                }
+                else {
+                    return callback(null,util.createSuccessResponseMessage(CONSTANTS.LOGOUT));
+                }
+            });
         }
-        else {
-            return callback(null,util.createSuccessResponseMessage(CONSTANTS.LOGOUT));
-        }
+        else
+            callback(new Error(errors.NOT_AUTHORIZED), null);
     });
 };
 var register=function(email,username,firstname,lastname,password,phone,callback)
@@ -221,14 +176,10 @@ var register=function(email,username,firstname,lastname,password,phone,callback)
         phone:phone
     };
     async.waterfall([function(callback){
-        dao.userDao.addUser(user,function(err){
-            callback(err);
-        });
+        dao.userDao.addUser(user,callback);
     },
         function(callback){
-            dao.userDao.getUserId(username,function(err,userId) {
-                callback(err,userId);
-            });
+            dao.userDao.getUserId(username,callback);
         },
         function(userId,callback){
             dao.tokenDao.setToken(token,userId,function(err) {
@@ -239,7 +190,7 @@ var register=function(email,username,firstname,lastname,password,phone,callback)
     ],function(err){
         if(err) {
             console.log(err);
-          return callback(null,util.createErrorResponseMessage(err));
+            return callback(null,util.createErrorResponseMessage(err));
         }
         else {
             return callback(null,util.createSuccessResponseMessage(CONSTANTS.REGISTER));
@@ -251,6 +202,5 @@ module.exports={
     Logout:Logout,
     register:register,
     startFollowing:startFollowing,
-    stopFollowing:stopFollowing,
-    unFollow:unFollow
+    stopFollowing:stopFollowing
 };

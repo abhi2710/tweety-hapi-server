@@ -12,7 +12,8 @@ var async=require('async'),
     util=require('../util'),
     privateKey = Config.key.REGISTERPRIVATEKEY,
     Constants=require('../Config/Constants'),
-    CONSTANTS=Constants.ROUTECONSTANTS;
+    CONSTANTS=Constants.ROUTECONSTANTS,
+    errors=Constants.ERRORS;
 
 var smtpTransport = nodemailer.createTransport("SMTP", {
     service: "Gmail",
@@ -68,31 +69,23 @@ function mail(from, email, subject, mailbody){
 function isAuth(recievedToken,callback){
     async.waterfall([function (callback) {
         try {
-        var decode = Jwt.decode(recievedToken);
+            var decode = Jwt.decode(recievedToken);
         }
         catch (err) {
-            callback(new Error("invalidtoken"), null);
+            callback(new Error(errors.INVALID_TOKEN), null);
             return;
         }
         callback(null,decode.userId)
     },
         function (userId, callback) {
-            dao.userDao.getAccessToken(userId,function(err,tokens){
-                callback(null, tokens);
-            });
+            dao.userDao.getAccessToken(userId,callback);
         },
-        function (tokens, callback) {
-           var valid=false;
-                if (tokens === recievedToken) {
-                    valid = true;
-                }
-            callback(null, valid)
+        function (token, callback) {
+            if (token === recievedToken) {
+                callback(null,true)
+            }
         }
     ], function (err, valid) {
-        if (err) {
-            console.log(err);
-            return err;
-        }
         return callback(null,valid);
     });
 }
@@ -101,11 +94,9 @@ var verify=function(recievedToken,callback){
     async.waterfall([function (callback) {
         try{var decode = Jwt.decode(recievedToken);}
         catch(err) {
-            return callback(err)
+            return callback(new Error(errors.INVALID_TOKEN))
         }
-        dao.userDao.getUserId(decode.username,function(err,userId) {
-            callback(err,userId);
-        });
+        dao.userDao.getUserId(decode.username,callback);
     },
         function (userId,callback) {
             dao.tokenDao.getToken(userId,function(err,token){
@@ -114,15 +105,12 @@ var verify=function(recievedToken,callback){
         },
         function (token,userId,callback) {
             if (token===recievedToken) {
-                dao.userDao.setUserVerified(userId,function(err,result){
-                        callback(err,result)
-                });
+                dao.userDao.setUserVerified(userId,callback);
             }
             else callback(err,null)
         }
-    ], function (err,result) {
+    ], function (err) {
         if(err) {
-            console.log(err);
             return callback(null,util.createErrorResponseMessage(err));
         }
         else {

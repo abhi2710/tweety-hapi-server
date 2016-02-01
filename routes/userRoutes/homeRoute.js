@@ -7,13 +7,8 @@ var home={
     method: 'POST',
     path:'/home',
     handler: function (request, reply) {
-        controller.verificationController.isAuth(request.headers.authorization,function(err,isAuthorized) {
-            if(isAuthorized) {
                 controller.tweetsController.display(request.headers.authorization,request.payload.display,request.payload.tweet,function(err,result){
                     reply(result.response).code(result.statusCode);
-                });
-            }
-            else reply("Not Authorized!");
         });
     },
     config: {
@@ -35,12 +30,8 @@ var follow={
     method: 'POST',
     path:'/Follow',
     handler: function (request, reply) {
-        controller.verificationController.isAuth(request.headers.authorization,function(err,flag) {
-            if(flag===true) {
                 controller.userController.startFollowing(request.headers.authorization,request.payload.username,function(err,result){
                     reply(result.response.message).code(result.statusCode);
-                });
-            }
         });
     },
     config: {
@@ -61,12 +52,8 @@ var unFollow={
     method: 'POST',
     path:'/unFollow',
     handler: function (request, reply) {
-        controller.verificationController.isAuth(request.headers.authorization,function(err,flag) {
-            if(flag===true) {
                 controller.userController.stopFollowing(request.headers.authorization,request.payload.username,function(err,result){
                     reply(result.response.message).code(result.statusCode);
-                });
-            }
         });
     },
     config: {

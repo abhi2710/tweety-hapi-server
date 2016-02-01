@@ -14,15 +14,11 @@ var getAccessToken=function(userId,callback){
 };
 
 var setAccessToken=function(userId,token,callback) {
-    DAOmanager.update(models.users, {_id: userId}, {accessToken:token},{}, function (err,document) {
-        return callback(err, document.accessToken);
-    });
+    DAOmanager.update(models.users, {_id: userId}, {accessToken:token},{},callback);
 };
 
 var setUserVerified=function(userId,callback){
-    DAOmanager.update(models.users,{_id:userId},{isVerified:true},{},function (err,document) {
-        return callback(err,document.isVerified);
-    });
+    DAOmanager.update(models.users,{_id:userId},{isVerified:true},{},callback);
 };
 
 var isRegistered=function(username,callback) {
@@ -37,10 +33,9 @@ var getUserId=function(username,callback){
         else return callback(err,null);
 });
 };
+
 var addUser=function(user,callback){
-    DAOmanager.setData (models.users,user,function (err,isUserSaved) {
-        return callback(err,isUserSaved)
-    });
+    DAOmanager.setData (models.users,user,callback);
 };
 
 var getFollowers=function(userId,callback) {
@@ -103,9 +98,14 @@ var getFollowingId=function(userId,callback) {
     });
 };
 var getUsers=function(callback) {
-    DAOmanager.getData(models.users,{}, {}, {}, function (err, data) {
-        if(data)
-            return callback(err, data.username);
+    DAOmanager.getallData(models.users,{}, {}, {}, function (err, data) {
+        if(data) {
+            var users=[];
+            for(key in data) {
+                users.push(data[key].username);
+            }
+            return callback(err,users);
+        }
         else
             return callback(err,data);
     });
@@ -113,25 +113,25 @@ var getUsers=function(callback) {
 
 var addtoFollowing=function(userId,followUserId,callback) {
     DAOmanager.update(models.users,{_id:userId},{$addToSet:{following:followUserId}},{},function(err,data){
-        return callback(err,data);
+        return callback(err,data.nModified);
     });
 };
 
 var addtoFollowers=function(userId,followUserId,callback) {
     DAOmanager.update(models.users,{_id:followUserId},{$addToSet:{followers:userId}},{},function(err,data){
-        return callback(err,data);
+        return callback(err,data.nModified);
     });
 };
 
 var removefromFollowers=function(userId,followUserId,callback) {
     DAOmanager.update(models.users,{_id:followUserId},{$pull:{followers:userId}},{},function(err,data){
-        return callback(err,data);
+        return callback(err,data.nModified);
     });
 };
 
 var removefromFollowing=function(userId,followUserId,callback) {
     DAOmanager.update(models.users,{_id:userId},{$pull:{following:followUserId}},{},function(err,data){
-        return callback(err,data);
+        return callback(err,data.nModified);
     });
 };
 

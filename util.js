@@ -5,9 +5,10 @@
         errorMessages=Config.responseMessages.ERROR_MESSAGES,
         successMessages=Config.responseMessages.SUCCESS_MESSAGES,
         Constants=require('./Config/Constants'),
-        CONSTANTS=Constants.ROUTECONSTANTS;
+        CONSTANTS=Constants.ROUTECONSTANTS,
+        errors=Constants.ERRORS;
 
-var createErrorResponseMessage=function(err,result){
+var createErrorResponseMessage=function(err){
     var error={
         response:{
             message:"Bad Request",
@@ -18,20 +19,23 @@ var createErrorResponseMessage=function(err,result){
 if(err.code===11000) {
     error.response.message=errorMessages.USERNAME_OR_EMAIL_TAKEN;
 }
-else if(err.name==='SyntaxError') {
-    error.response.message = errorMessages.INVALID_TOKEN;
-}
-    if(err.message==='usernotverified') {
-        error.response.message = errorMessages.USER_NOT_VERIFIED;
-    }
-    else  if(err.message==='invalidtoken') {
-        error.response.message = errorMessages.INVALID_TOKEN;
-    }
-    else  if(err.message==='invalidusername') {
-        error.response.message = errorMessages.INVALID_ID;
-    }
-    if(result===false) {
-        error.response.message = errorMessages.ALREADY_NOT_FOLLOWED;
+    switch(err.message)
+    {
+        case errors.USER_NOT_VERIFIED:error.response.message = errorMessages.USER_NOT_VERIFIED;
+            break;
+        case errors.INVALID_TOKEN:error.response.message = errorMessages.INVALID_TOKEN;
+            break;
+        case errors.INVALID_USERNAME:error.response.message = errorMessages.INVALID_ID;
+            break;
+        case errors.NOT_AUTHORIZED:error.response.message = errorMessages.ACTION_NO_AUTH;
+            error.statusCode=401;
+            break;
+        case errors.ALREADY_FOLLOWED:error.response.message = errorMessages.ALREADY_FOLLOWED;
+            break;
+        case errors.ALREADY_UNFOLLOWED:error.response.message = errorMessages.ALREADY_NOT_FOLLOWED;
+            break;
+        default:error.response.message =errorMessages.BAD_REQUEST;
+            break;
     }
 return error;
 };
