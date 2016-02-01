@@ -44,14 +44,57 @@ var addUser=function(user,callback){
 };
 
 var getFollowers=function(userId,callback) {
+    DAOmanager.getDataWithReference(models.users,{_id:userId},{}, {},{
+        path: 'followers',
+        select: 'username firstname lastname',
+        options: {lean:true}
+    },function (err,data) {
+        if (err) return console.error(err);
+        var FollowersArr=[];
+        var key=0;
+        var len=data[key].followers.length;
+        for (var i = 0; i < len; i++) {
+            var follower = {};
+            follower['username']=data[key].followers[i].username;
+            follower['firstname']=data[key].followers[i].firstname;
+            follower['lastname']=data[key].followers[i].lastname;
+            FollowersArr.push(follower);
+        }
+        return callback(err,FollowersArr);
+    });
+};
+
+var getFollowing=function(userId,callback) {
+    DAOmanager.getDataWithReference(models.users,{_id:userId},{}, {},{
+        path: 'following',
+        select: 'username firstname lastname',
+        options: {lean:true}
+    },function (err,data) {
+        if (err) return console.error(err);
+        var FollowingArr=[];
+        var key=0;
+        var len=data[key].following.length;
+        for (var i = 0; i < len; i++) {
+            var following = {};
+            following['username']=data[key].following[i].username;
+            following['firstname']=data[key].following[i].firstname;
+            following['lastname']=data[key].following[i].lastname;
+            FollowingArr.push(following);
+        }
+        return callback(err,FollowingArr);
+    });
+};
+
+var getFollowersId=function(userId,callback){
     DAOmanager.getData(models.users, {_id:userId}, {}, {}, function (err, data) {
         if(data)
             return callback(err, data.followers);
         else
-        return callback(err,data);
+            return callback(err,data);
     });
 };
-var getFollowing=function(userId,callback) {
+
+var getFollowingId=function(userId,callback) {
     DAOmanager.getData(models.users, {_id:userId}, {}, {}, function (err, data) {
         if(data)
             return callback(err, data.following);
@@ -68,22 +111,26 @@ var getUsers=function(callback) {
     });
 };
 
-var initiatefollow=function(user,callback){
-    DAOmanager.setData (models.users,user,function (err,isUserSaved) {
-        return callback(err,isUserSaved)
-    });
-};
-
 var addtoFollowing=function(userId,followUserId,callback) {
-    DAOmanager.update(models.users,{_id:followUserId},{$addToSet:{following:userId}},{},function(err,data){
+    DAOmanager.update(models.users,{_id:userId},{$addToSet:{following:followUserId}},{},function(err,data){
         return callback(err,data);
     });
 };
 
 var addtoFollowers=function(userId,followUserId,callback) {
-    DAOmanager.update(models.users,{_id:userId},{$addToSet:{followers:followUserId}},{},function(err,data){
-        console.log("user: "+userId);
-        console.log("follow: "+followUserId);
+    DAOmanager.update(models.users,{_id:followUserId},{$addToSet:{followers:userId}},{},function(err,data){
+        return callback(err,data);
+    });
+};
+
+var removefromFollowers=function(userId,followUserId,callback) {
+    DAOmanager.update(models.users,{_id:followUserId},{$pull:{followers:userId}},{},function(err,data){
+        return callback(err,data);
+    });
+};
+
+var removefromFollowing=function(userId,followUserId,callback) {
+    DAOmanager.update(models.users,{_id:userId},{$pull:{following:followUserId}},{},function(err,data){
         return callback(err,data);
     });
 };
@@ -99,7 +146,10 @@ module.exports={
     getFollowers:getFollowers,
     addtoFollowers:addtoFollowers,
     addtoFollowing:addtoFollowing,
-    initiatefollow:initiatefollow,
     getFollowing:getFollowing,
-    getUsers:getUsers
+    getFollowingId:getFollowingId,
+    getFollowersId:getFollowersId,
+    getUsers:getUsers,
+    removefromFollowers:removefromFollowers,
+    removefromFollowing:removefromFollowing
 };

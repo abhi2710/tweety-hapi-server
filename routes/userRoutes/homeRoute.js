@@ -33,7 +33,7 @@ var home={
 };
 var follow={
     method: 'POST',
-    path:'/addFollower',
+    path:'/Follow',
     handler: function (request, reply) {
         controller.verificationController.isAuth(request.headers.authorization,function(err,flag) {
             if(flag===true) {
@@ -63,7 +63,7 @@ var unFollow={
     handler: function (request, reply) {
         controller.verificationController.isAuth(request.headers.authorization,function(err,flag) {
             if(flag===true) {
-                controller.userController.startFollowing(request.headers.authorization,request.payload.username,function(err,result){
+                controller.userController.stopFollowing(request.headers.authorization,request.payload.username,function(err,result){
                     reply(result.response.message).code(result.statusCode);
                 });
             }

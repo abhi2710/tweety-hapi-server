@@ -11,8 +11,8 @@ var userSchema=new mongoose.Schema({
     phone:{type:Number,required:true},
     isVerified:{type:Boolean,required:true,default:false},
     accessToken:{type:String,default:0},
-    following:[{ type: mongoose.Schema.Types.ObjectId}],
-    followers:[{ type: mongoose.Schema.Types.ObjectId}],
+    following:[{ type: mongoose.Schema.Types.ObjectId,ref:'users'}],
+    followers:[{ type: mongoose.Schema.Types.ObjectId,ref:'users'}],
 });
 module.exports=mongoose.model("users",userSchema);
 

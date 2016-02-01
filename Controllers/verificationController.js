@@ -1,7 +1,7 @@
 /**
  * Created by abhinav on 1/15/2016.
  */
-var async=require('Async'),
+var async=require('async'),
     Jwt=require('jsonwebtoken'),
     Config = require('../Config/email'),
     nodemailer = require("nodemailer"),
@@ -24,13 +24,13 @@ var smtpTransport = nodemailer.createTransport("SMTP", {
 
 var sentMailVerificationLink = function(email,token) {
     var from = Config.email.accountName+" Team<" + Config.email.username + ">";
-    var mailbody = "<p>Thanks for Registering on "+"Tweety"+" </p><p>Please verify your email by clicking on the verification link below.<br/><a href='http://"+"localhost"+":"+"8500"+"/"+"verifyEmail"+"/"+token+"'>Verification Link</a></p>"
+    var mailbody = "<p>Thanks for Registering on "+"Tweety"+" </p><p>Please verify your email by clicking on the verification link below.<br/><a href='http://"+"localhost"+":"+"8500"+"/"+"verifyEmail"+"/"+token+"'>Verification Link</a></p>";
     mail(from, email , "Account Verification", mailbody);
 };
 
 exports.sentMailForgotPassword = function(user,callback) {
     var from = Config.email.accountName+" Team<" + Config.email.username + ">";
-    var mailbody = "<p>Your "+Config.email.accountName+"  Account Credential</p><p>username : "+user.userName+" , password : "+decrypt(user.password)+"</p>"
+    var mailbody = "<p>Your "+Config.email.accountName+"  Account Credential</p><p>username : "+user.userName+" , password : "+decrypt(user.password)+"</p>";
     mail(from, user.userName , "Account password", mailbody,function(err,response){
         console.log("forgot password "+response);
         return callback(err,response);
@@ -53,7 +53,7 @@ function encrypt(password) {
     return crypted;
 }
 
-function mail(from, email, subject, mailbody,callback){
+function mail(from, email, subject, mailbody){
     var mailOptions = {
         from: from, // sender address
         to: email, // list of receivers
@@ -62,18 +62,18 @@ function mail(from, email, subject, mailbody,callback){
         html: mailbody  // html body
     };
 
-    smtpTransport.sendMail(mailOptions)
-            smtpTransport.close(); /// / shut down the connection pool, no more messages
+    smtpTransport.sendMail(mailOptions);
+    smtpTransport.close(); /// / shut down the connection pool, no more messages
 }
 function isAuth(recievedToken,callback){
     async.waterfall([function (callback) {
-        //try {
-            var decode = Jwt.decode(recievedToken);
-        //}
-        //catch (err) {
-        //    callback(err, null);
-        //    return;
-        //}
+        try {
+        var decode = Jwt.decode(recievedToken);
+        }
+        catch (err) {
+            callback(new Error("invalidtoken"), null);
+            return;
+        }
         callback(null,decode.userId)
     },
         function (userId, callback) {
@@ -98,7 +98,6 @@ function isAuth(recievedToken,callback){
 }
 
 var verify=function(recievedToken,callback){
-    var username;
     async.waterfall([function (callback) {
         try{var decode = Jwt.decode(recievedToken);}
         catch(err) {
@@ -127,7 +126,7 @@ var verify=function(recievedToken,callback){
             return callback(null,util.createErrorResponseMessage(err));
         }
         else {
-            return callback(null,util.createSuccessResponseMessage(CONSTANTS.VERIFYEMAIL));
+            return callback(null,util.createSuccessResponseMessage(CONSTANTS.VERIFYEMAIL,result));
         }
     });
 };

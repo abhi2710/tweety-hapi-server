@@ -33,7 +33,7 @@ var display= function(token,display,tweet,callback) {
                 });
             break;
     }
-}
+};
 var showUsers=function(callback) {
     async.waterfall([
         function(callback){
@@ -114,12 +114,12 @@ var showTweets=function(token,callback) {
              var decode = jwt.decode(token)
          }
          catch (err) {
-            return callback(err,null);
+            return callback(new Error("invalidtoken"),null);
          }
          callback(null,decode.userId);
      },
      function(userId,callback){
-        dao.userDao.getFollowers(userId,function(err,data){
+        dao.userDao.getFollowingId(userId,function(err,data){
             if(data)
             data.push(userId);
             else data=[userId];

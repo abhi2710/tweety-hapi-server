@@ -43,7 +43,7 @@ exports.setData = function (model, data, callback) {
     new model(data).save(function (err, resultData) {
 
         if (err) {
-            logger.error("SET DATA: ", err);
+           // logger.error("SET DATA: ", err);
             return callback(err,null);
         }
           else {

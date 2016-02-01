@@ -26,12 +26,12 @@ var unFollow=function(token,followUsername,callback) {
                 dao.userDao.getUserId(followUsername,function(err,followUserId) {
                     if (followUserId)
                         async.parallel([function (callback) {
-                                dao.userDao.RemovefromFollowers(userId, followUserId, function (err,isRemoved) {
+                                dao.userDao.removefromFollowers(userId, followUserId, function (err,isRemoved) {
                                     callback(err,isRemoved);
                                 });
                             },
                                 function (callback) {
-                                    dao.userDao.RemovefromFollowing(userId,followUserId, function (err, isRemoved) {
+                                    dao.userDao.removefromFollowing(userId,followUserId, function (err, isRemoved) {
                                         callback(err,isRemoved);
                                     });
                                 }],
@@ -39,7 +39,8 @@ var unFollow=function(token,followUsername,callback) {
                                 if (results[0] && results[1]) {
                                     return callback(err, true);
                                 }
-                                return callback(err, false)
+                                else
+                                return callback(new Error("alreadyunfollowed"), false)
                             });
                     else callback(null,false)
                 });
@@ -84,7 +85,8 @@ var startFollowing=function(token,followUsername,callback) {
                                 if (results[0] && results[1]) {
                                     return callback(err, true);
                                 }
-                                return callback(err, false)
+                                else
+                                return callback(new Error("alreadyfollowed"), false)
                             });
                     else callback(new Error('invalidusername'),false)
                 });
@@ -96,6 +98,52 @@ var startFollowing=function(token,followUsername,callback) {
         }
         else {
             return callback(null, util.createSuccessResponseMessage(CONSTANTS.FOLLOW));
+        }
+    });
+};
+
+var stopFollowing=function(token,followUsername,callback) {
+    async.waterfall([
+        function(callback) {
+            try {
+                var decode = Jwt.decode(token);
+            }
+            catch(err) {
+                callback(err,null);
+            }
+            callback(null,decode.userId);
+        },
+        function(userId,callback){
+            if(userId)
+                dao.userDao.getUserId(followUsername,function(err,followUserId) {
+                    if (followUserId)
+                        async.parallel([function (callback) {
+                                dao.userDao.removefromFollowers(userId, followUserId, function (err,isAdded) {
+                                    callback(err,isAdded);
+                                });
+                            },
+                                function (callback) {
+                                    dao.userDao.removefromFollowing(userId,followUserId, function (err, isAdded) {
+                                        callback(err,isAdded);
+                                    });
+                                }],
+                            function (err, results) {
+                                if (results[0] && results[1]) {
+                                    return callback(err, true);
+                                }
+                                else
+                                    return callback(new Error("alreadyUnfollowed"), false)
+                            });
+                    else callback(new Error('invalidusername'),false)
+                });
+            else callback(new Error('invalidtoken'),false)
+        }
+    ],function(err) {
+        if (err) {
+            return callback(null, util.createErrorResponseMessage(err));
+        }
+        else {
+            return callback(null, util.createSuccessResponseMessage(CONSTANTS.UNFOLLOW));
         }
     });
 };
@@ -203,5 +251,6 @@ module.exports={
     Logout:Logout,
     register:register,
     startFollowing:startFollowing,
+    stopFollowing:stopFollowing,
     unFollow:unFollow
 };
