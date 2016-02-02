@@ -19,6 +19,7 @@ var createErrorResponseMessage=function(err){
 if(err.code===11000) {
     error.response.message=errorMessages.USERNAME_OR_EMAIL_TAKEN;
 }
+    else
     switch(err.message)
     {
         case errors.USER_NOT_VERIFIED:error.response.message = errorMessages.USER_NOT_VERIFIED;
@@ -33,6 +34,8 @@ if(err.code===11000) {
         case errors.ALREADY_FOLLOWED:error.response.message = errorMessages.ALREADY_FOLLOWED;
             break;
         case errors.ALREADY_UNFOLLOWED:error.response.message = errorMessages.ALREADY_NOT_FOLLOWED;
+            break;
+        case errors.INVALID_CREDENTIALS:error.response.message = errorMessages.INVALID_OLD_PASSWORD;
             break;
         default:error.response.message =errorMessages.BAD_REQUEST;
             break;

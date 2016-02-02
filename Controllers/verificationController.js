@@ -78,11 +78,17 @@ function isAuth(recievedToken,callback){
         callback(null,decode.userId)
     },
         function (userId, callback) {
-            dao.userDao.getAccessToken(userId,callback);
+            dao.userDao.getAccessToken(userId,function(err,token) {
+                callback(token,userId)
+            });
         },
-        function (token, callback) {
+        function (token,userId, callback) {
             if (token === recievedToken) {
-                callback(null,true)
+                dao.userDao.getUsername(userId,function(err,username) {
+                    dao.userDao.isRegistered(username,function(err) {
+                        callback(null,true);
+                    });
+                });
             }
         }
     ], function (err, valid) {
@@ -105,7 +111,7 @@ var verify=function(recievedToken,callback){
         },
         function (token,userId,callback) {
             if (token===recievedToken) {
-                dao.userDao.setUserVerified(userId,callback);
+                dao.userDao.setUserVerified(userId,tr,callback);
             }
             else callback(err,null)
         }

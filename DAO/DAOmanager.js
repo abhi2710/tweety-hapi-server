@@ -119,17 +119,14 @@ exports.getCount = function (model, condition, callback) {
  */
 exports.update = function (model, conditions, update, options, callback) {
     model.update(conditions, update, options, function (err, result) {
-
         if (err) {
-            logger.error("Update Query: ", err);
+            //logger.error("Update Query: ", err);
             return callback(err);
         }
         logger.trace("Update Result: ", JSON.stringify(result));
         return callback(null,result);
-
     });
 };
-
 /*
  ---------------------------------------------------------------------------------------------
  WARNING: Not a general module just for category-sub-service tree or for three level tree only

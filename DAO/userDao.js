@@ -7,18 +7,30 @@ var getPassword=function(username,callback){
     });
 };
 
+var getPasswordbyId=function(userId,callback){
+    DAOmanager.getData(models.users,{_id:userId},{},function(err,document){
+        return callback(err,document.password);
+    });
+};
+
 var getAccessToken=function(userId,callback){
     DAOmanager.getData(models.users,{_id:userId},{},function(err,document) {
         return callback(err, document.accessToken);
     });
 };
 
+var setUserDetails=function(userId,data,callback) {
+DAOmanager.update(models.users,{_id:userId},{$set:data},{},function(err,result) {
+    return callback(err,result);
+});
+};
+
 var setAccessToken=function(userId,token,callback) {
     DAOmanager.update(models.users, {_id: userId}, {accessToken:token},{},callback);
 };
 
-var setUserVerified=function(userId,callback){
-    DAOmanager.update(models.users,{_id:userId},{isVerified:true},{},callback);
+var setUserVerified=function(userId,valid,callback){
+    DAOmanager.update(models.users,{_id:userId},{isVerified:valid},{},callback);
 };
 
 var isRegistered=function(username,callback) {
@@ -32,6 +44,14 @@ var getUserId=function(username,callback){
             return callback(err,document._id);
         else return callback(err,null);
 });
+};
+
+var getUsername=function(userId,callback){
+    DAOmanager.getData(models.users, {_id:userId}, {}, function (err, document) {
+        if(document)
+            return callback(err,document.username);
+        else return callback(err,null);
+    });
 };
 
 var addUser=function(user,callback){
@@ -137,19 +157,22 @@ var removefromFollowing=function(userId,followUserId,callback) {
 
 module.exports={
     getPassword:getPassword,
-    setAccessToken:setAccessToken,
-    getAccessToken:getAccessToken,
-    isRegistered:isRegistered,
-    setUserVerified:setUserVerified,
-    addUser:addUser,
+    getPasswordbyId:getPasswordbyId,
     getUserId:getUserId,
+    getUsername:getUsername,
     getFollowers:getFollowers,
-    addtoFollowers:addtoFollowers,
-    addtoFollowing:addtoFollowing,
     getFollowing:getFollowing,
     getFollowingId:getFollowingId,
     getFollowersId:getFollowersId,
     getUsers:getUsers,
+    getAccessToken:getAccessToken,
+    setAccessToken:setAccessToken,
+    setUserVerified:setUserVerified,
+    setUserDetails:setUserDetails,
+    addUser:addUser,
+    addtoFollowers:addtoFollowers,
+    addtoFollowing:addtoFollowing,
     removefromFollowers:removefromFollowers,
-    removefromFollowing:removefromFollowing
+    removefromFollowing:removefromFollowing,
+    isRegistered:isRegistered
 };

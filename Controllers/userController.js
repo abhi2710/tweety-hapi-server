@@ -59,6 +59,63 @@ var startFollowing=function(token,followUsername,callback) {
     });
 };
 
+var editProfile=function(token,data,callback) {
+    async.waterfall([
+        function(callback) {
+            verify.isAuth(token,function(err,isAuthorized) {
+                if (isAuthorized) {
+                    try {
+                        var decode = Jwt.decode(token);
+                        callback(null, decode.userId);
+                    }
+                    catch (err) {
+                        console.log(err);
+                        callback(new Error(errors.INVALID_TOKEN), null);
+                    }
+                }
+                else
+                    callback(new Error(errors.NOT_AUTHORIZED), null);
+            });
+        },
+        function(userId,callback){
+            dao.userDao.getPasswordbyId(userId,function(err,pass) {
+                if (pass===data['oldpassword']) {
+                    console.log("dbpass:"+pass);
+                    console.log("oldpass:"+data['oldpassword']);
+                    dao.userDao.setUserDetails(userId,data,function (err) {
+                        callback(err,userId);
+                    });
+                }
+                else
+                    callback(new Error(errors.INVALID_CREDENTIALS));
+            });
+        },
+        function(userId,callback) {
+            if (data['email']) {
+                dao.userDao.setUserVerified(userId,false,function(err,doc) {
+                    dao.userDao.getUsername(userId, function (err, username) {
+                        var token = Jwt.sign({
+                            username: username,
+                            timestamp: Date.now()
+                        },privateKey);
+                        dao.tokenDao.setToken(token, userId, function (err,res) {
+                            verify.sentMailVerificationLink(data['email'],token);
+                            callback(null);
+                        });
+                    });
+                });
+            }
+            else
+                callback(null);
+        }
+    ],function(err) {
+        if (err)
+            return callback(null, util.createErrorResponseMessage(err));
+        else
+            return callback(null, util.createSuccessResponseMessage(CONSTANTS.EDITDETAILS));
+    });
+};
+
 var stopFollowing=function(token,followUsername,callback) {
     async.waterfall([
         function(callback) {
@@ -202,5 +259,6 @@ module.exports={
     Logout:Logout,
     register:register,
     startFollowing:startFollowing,
-    stopFollowing:stopFollowing
+    stopFollowing:stopFollowing,
+    editProfile:editProfile
 };

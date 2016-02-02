@@ -70,4 +70,56 @@ var unFollow={
         }
     }
 };
-module.exports=[home,follow,unFollow];
+
+var editProfile={
+    method: 'Put',
+    path:'/editProfile',
+    handler: function (request, reply) {controller.userController.editProfile(request.headers.authorization,request.payload,
+        function(err,result){
+            reply(result.response).code(result.statusCode);
+        });
+    },
+    config: {
+        description: 'edit profile',
+        notes: 'edit profile details',
+        tags: ['api'],
+        validate: {
+            headers:Joi.object({
+                'authorization': Joi.string().required()
+            }).options({ allowUnknown: true }),
+            payload: {
+                username: Joi.string(),
+                email:Joi.string().email(),
+                firstname:Joi.string(),
+                lastname:Joi.string(),
+                oldpassword:Joi.string().required(),
+                password:Joi.string(),
+                phone:Joi.number()
+            }
+        }
+    }
+};
+
+//var uploadProfilePic={
+//    method: 'POST',
+//    path:'/uploadProfilePic',
+//    handler: function (request, reply) {
+//            reply().view();
+//    },
+//    config: {
+//        description: 'profile pic',
+//        notes: 'upload profile picture',
+//        tags: ['api'],
+//        validate: {
+//            headers:Joi.object({
+//                'authorization': Joi.string().required()
+//            }).options({ allowUnknown: true }),
+//            payload: {
+//                username: Joi.string().description("username"),
+//                picture:Joi.string()
+//            }
+//        }
+//    }
+//};
+
+module.exports=[home,follow,unFollow,editProfile];
