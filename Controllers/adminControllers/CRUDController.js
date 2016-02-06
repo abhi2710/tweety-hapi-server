@@ -1,4 +1,5 @@
 var async=require('async'),
+    jwt=require('jsonwebtoken'),
     dao=require('../../DAO/index'),
     Constants=require('../../Config/'),
     util=require('../../util'),
@@ -94,6 +95,15 @@ var showTweets=function(token,username,callback) {
 var deleteTweet=function(token,tweet_id,callback) {
     async.waterfall([
         function(callback) {
+            try{
+                var decode=jwt.decode(token);
+            }
+            catch(err){
+                callback(new Error(errorMessages.INVALID_TOKEN), null);
+            }
+            if(!(decode.scope==="SuperAdmin")){
+                callback(new Error(errorMessages.ACTION_NO_AUTH))
+            }
             if(tweet_id==="")
                 callback(new Error(errorMessages.INVALID_ID));
             verify.isAuth(token,'admin', function (err, isAuthorized) {
@@ -118,6 +128,16 @@ var deleteTweet=function(token,tweet_id,callback) {
 var deleteUser=function(token,username,callback) {
     async.waterfall([
         function(callback) {
+            try{
+                var decode=jwt.decode(token);
+            }
+            catch(err){
+                callback(new Error(errorMessages.INVALID_TOKEN), null);
+            }
+
+            if(!(decode.scope==="SuperAdmin")){
+                callback(new Error(errorMessages.ACTION_NO_AUTH))
+            }
             if(username==="")
                 callback(new Error(errorMessages.INVALID_ID));
             verify.isAuth(token,"admin", function (err, isAuthorized) {
