@@ -1,6 +1,3 @@
-/**
- * Created by abhinav on 1/25/2016.
- */
 'use strict';
 var Routes = require('./routes'),
     Plugins = require('./Plugins'),

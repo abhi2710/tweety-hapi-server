@@ -25,7 +25,7 @@ var smtpTransport = nodemailer.createTransport("SMTP", {
 
 var sentMailVerificationLink = function(email,token) {
     var from = Config.email.accountName+" Team<" + Config.email.username + ">";
-    var mailbody = "<p>Thanks for Registering on "+"Tweety"+" </p><p>Please verify your email by clicking on the verification link below.<br/><a href='http://"+"localhost"+":"+"8500"+"/"+"verifyEmail"+"/"+token+"'>Verification Link</a></p>";
+    var mailbody = "<p>Thanks for Registering on "+"Tweety"+" </p><p>Please verify your email by clicking on the verification link below.<br/><a href='http://"+"localhost"+":"+"8500"+"/user/"+"verifyEmail"+"/"+token+"'>Verification Link</a></p>";
     mail(from, email , "Account Verification", mailbody);
 };
 
@@ -66,7 +66,7 @@ function mail(from, email, subject, mailbody){
     smtpTransport.sendMail(mailOptions);
     smtpTransport.close(); /// / shut down the connection pool, no more messages
 }
-function isAuth(recievedToken,callback){
+function isAuth(recievedToken,model,callback){
     async.waterfall([function (callback) {
         try {
             var decode = Jwt.decode(recievedToken);
@@ -77,24 +77,40 @@ function isAuth(recievedToken,callback){
         }
         callback(null,decode.userId)
     },
-        function (userId, callback) {
-            dao.userDao.getAccessToken(userId,function(err,token) {
-                callback(token,userId)
-            });
-        },
-        function (token,userId, callback) {
-            if (token === recievedToken) {
-                dao.userDao.getUsername(userId,function(err,username) {
-                    dao.userDao.isRegistered(username,function(err) {
-                        callback(null,true);
+        function(userId,callback)
+        {
+            if(model==="user") {
+                    dao.userDao.getAccessToken(userId,function(err,token) {
+                        callback(token,userId)
                     });
+            }
+            else if(model==="admin") {
+                dao.adminDao.getAccessToken(userId,function(err,token) {
+                    callback(token,userId)
                 });
             }
+            else
+                callback(new Error(errors.NOT_AUTHORIZED));
+        },
+        function (token,userId, callback) {
+            if(model==='user') {
+                if (token === recievedToken) {
+                    dao.userDao.getUsername(userId,function(err,username) {
+                        dao.userDao.isRegistered(username,callback);
+                    });
+                }
+            }
+            else if(model==='admin') {
+                if(token===recievedToken) {
+                    callback(null,true);
+                }
+            }
+            else callback(new Error(errors.NOT_AUTHORIZED));
         }
     ], function (err, valid) {
         return callback(null,valid);
     });
-}
+};
 
 var verify=function(recievedToken,callback){
     async.waterfall([function (callback) {
@@ -111,15 +127,16 @@ var verify=function(recievedToken,callback){
         },
         function (token,userId,callback) {
             if (token===recievedToken) {
-                dao.userDao.setUserVerified(userId,tr,callback);
+                dao.userDao.setUserVerified(userId,true,callback);
             }
             else callback(err,null)
         }
-    ], function (err) {
+    ], function (err,result) {
         if(err) {
             return callback(null,util.createErrorResponseMessage(err));
         }
         else {
+            result="";
             return callback(null,util.createSuccessResponseMessage(CONSTANTS.VERIFYEMAIL,result));
         }
     });

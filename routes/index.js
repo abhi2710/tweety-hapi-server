@@ -1,5 +1,6 @@
 module.exports = [
   require('./userRoutes/userRegisterRoute'),
-  require('./userRoutes/userLoginRoute'),
-  require('./userRoutes/homeRoute')
+  require('./userRoutes/homeRoute'),
+  require('./adminRoutes/adminRegisterRoute'),
+  require('./adminRoutes/homeRoute')
 ];

@@ -131,6 +131,13 @@ var getUsers=function(callback) {
     });
 };
 
+var getUser=function(username,callback){
+    DAOmanager.getData(models.users, {username:username}, {accessToken:0,password:0},{}, function (err, document) {
+        return callback(err,document);
+    });
+};
+
+
 var addtoFollowing=function(userId,followUserId,callback) {
     DAOmanager.update(models.users,{_id:userId},{$addToSet:{following:followUserId}},{},function(err,data){
         return callback(err,data.nModified);
@@ -155,6 +162,26 @@ var removefromFollowing=function(userId,followUserId,callback) {
     });
 };
 
+var removefromFollowingofothers=function(UserId,callback) {
+    var user=[UserId];
+    DAOmanager.update(models.users,{following:{$in:user}},{$pull:{following:UserId}},{multi:true},function(err,data){
+        return callback(err,data);
+    });
+};
+
+var removefromFollowersofothers=function(UserId,callback) {
+    var user=[UserId];
+    DAOmanager.update(models.users,{followers:{$in:user}},{$pull:{followers:UserId}},{multi:true},function(err,data){
+        return callback(err,data);
+    });
+};
+
+var deleteUser=function(username,callback){
+    DAOmanager.update(models.users,{username:username},{$set:{isDeleted:true}},{},function(err,data){
+        return callback(err,data.nModified);
+    });
+};
+
 module.exports={
     getPassword:getPassword,
     getPasswordbyId:getPasswordbyId,
@@ -174,5 +201,9 @@ module.exports={
     addtoFollowing:addtoFollowing,
     removefromFollowers:removefromFollowers,
     removefromFollowing:removefromFollowing,
-    isRegistered:isRegistered
+    removefromFollowingofothers:removefromFollowingofothers,
+    removefromFollowersofothers:removefromFollowersofothers,
+    isRegistered:isRegistered,
+    getUser:getUser,
+    deleteUser:deleteUser
 };

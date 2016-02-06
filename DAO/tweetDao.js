@@ -15,27 +15,51 @@ var addTweet=function(userId,tweet,callback) {
     });
 };
 
+var deleteTweet=function(tweet_id,callback) {
+    DAOmanager.update(models.tweet,{_id:tweet_id},{$set:{isDeleted:true}},{},function (err,doc) {
+        return callback(err,doc.tweet_text);
+    });
+};
+
+var getUserTweets=function(userId,callback) {
+    DAOmanager.getallData(models.tweet, {userId:userId},{}, {},function (err,data) {
+        if (err) return console.error(err);
+        var tweetsArr=[];
+        for(key in data) {
+            var tweet={};
+            tweet['tweet']=data[key].tweet_text;
+            tweet['time']=data[key].time;
+            tweet['isDeleted']=data[key].isDeleted;
+            tweetsArr.push(tweet);
+        }
+        return callback(err,tweetsArr);
+    });
+};
+
 var getTweets=function(followers,callback) {
     DAOmanager.getDataWithReference(models.tweet, {userId:{$in:followers}},{}, {},{
         path: 'userId',
         select: 'username firstname lastname',
+       // match:{'isDeleted':"false"},
         options: { lean:true,sort:{time:-1} }
     },function (err,data) {
         if (err) return console.error(err);
         var tweetsArr=[];
         for(key in data) {
-            var tweet={};
-            tweet['username']=data[key].userId.username;
-            tweet['firstname']=data[key].userId.firstname;
-            tweet['lastname']=data[key].userId.lastname;
-            tweet['tweet']=data[key].tweet_text;
-            tweet['time']=data[key].time;
-            tweetsArr.push(tweet);
+                var tweet = {};
+                tweet['username'] = data[key].userId.username;
+                tweet['firstname'] = data[key].userId.firstname;
+                tweet['lastname'] = data[key].userId.lastname;
+                tweet['tweet'] = data[key].tweet_text;
+                tweet['time'] = data[key].time;
+                tweetsArr.push(tweet);
         }
         return callback(err,tweetsArr);
     });
 };
 module.exports={
     addTweet:addTweet,
-    getTweets:getTweets
+    getTweets:getTweets,
+    getUserTweets:getUserTweets,
+    deleteTweet:deleteTweet
 };

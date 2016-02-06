@@ -39,6 +39,7 @@ const ERROR_MESSAGES = {
     'INVALID_EMAIL_VERIFY_ID': 'Invalid email verification request id',
     'INVALID_TOKEN': 'Invalid Token',
     'INVALID_FORGET_PASS_REQ_ID': 'Invalid reset password request id',
+    'INVALID_CREDENTIALS':'INVALID_CREDENTIALS',
     'PHONE_NUMBER_ALREADY_EXISTS': 'Phone number already exists.',
     'PHONE_NUMBER_NOT_EXISTS': 'Phone number does not exists.',
     'PHONE_NUMBER_NOT_FOUND': "Couldn't find the phone number.",

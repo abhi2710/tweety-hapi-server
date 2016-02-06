@@ -1,56 +1,41 @@
 /**
- * Created by abhinav on 1/25/2016.
+ * Created by abhinav on 2/1/2016.
  */
 var Joi=require('joi'),
     controller = require('../../Controllers/index');
 
-var Register={
+var adminRegister={
     method: 'POST',
-    path:'/user/register',
+    path:'/admin/register',
     handler: function (request, reply) {
-        controller.userBaseController.register(request.payload.email,request.payload.username,request.payload.firstname,request.payload.lastname,
-            request.payload.password,request.payload.phone,function(err,result){
+        controller.adminBaseController.register(request.payload,function(err,result){
                 reply(result.response).code(result.statusCode);
             });
     },
     config: {
-        description: 'Register a user',
+        description: 'Register an admin',
         notes: 'Returns a todo item by the id passed in the path',
         tags: ['api'],
         validate: {
             payload: {
+                adminname:Joi.string().required(),
                 email:Joi.string().email().required(),
-                username:Joi.string().required().alphanum().min(3).max(15),
                 firstname:Joi.string().required(),
                 lastname:Joi.string().required(),
                 password:Joi.string().required(),
-                phone:Joi.number().required()
+                phone:Joi.number().required(),
+                scope:Joi.string().required().allow('superAdmin','admin')
             }
         }
     }
 };
 
-var verifyEmail={
-    method: 'GET',
-    path:'/user/verifyEmail/{token}',
-    handler: function (request, reply) {
-        controller.verificationController.verify(request.params.token,function(err,result){
-            reply(result.response).code(result.statusCode);
 
-        });
-    },
-    config: {
-        description: 'e-mail Verification link',
-        notes: 'Returns a sorted array using the method specified passed in the path',
-        tags: ['api']
-    }
-};
-
-var Login={
+var adminLogin={
     method: 'POST',
-    path:'/user/login',
+    path:'/admin/login',
     handler: function (request, reply) {
-        controller.userBaseController.Login(request.payload.username,
+        controller.adminBaseController.Login(request.payload.username,
             request.payload.password,function(err,result,token){
                 reply(result.response.message).header("authorization",token).code(result.statusCode);
             });
@@ -68,11 +53,11 @@ var Login={
     }
 };
 
-var Logout={
+var adminLogout={
     method: 'DELETE',
-    path:'/user/logout',
+    path:'/admin/logout',
     handler: function (request, reply) {
-        controller.userBaseController.Logout(request.headers.authorization,function(err,result) {
+        controller.adminBaseController.Logout(request.headers.authorization,function(err,result) {
             reply(result.response.message).code(result.statusCode);
         });
     },
@@ -88,5 +73,6 @@ var Logout={
     }
 };
 
-module.exports=[Register,verifyEmail,Login,Logout];
+
+module.exports=[adminLogin,adminRegister,adminLogout];
 

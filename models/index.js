@@ -3,6 +3,7 @@
  */
 module.exports={
     users:require('./userModel'),
-    registerTokens:require('./tokenModel'),
-    tweet:require('./tweetModel')
+    registerTokens:require('./registerTokenModel'),
+    tweet:require('./tweetModel'),
+    admins:require('./adminModel')
 };
