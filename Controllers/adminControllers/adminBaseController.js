@@ -5,6 +5,7 @@
  * Created by abhinav on 2/1/2016.
  */
 var verify = require('./../verificationController'),
+    passhash=require('password-salt-and-hash'),
     Jwt = require('jsonwebtoken'),
     Constants=require('../../Config'),
     dao = require('../../DAO/index'),
@@ -21,11 +22,16 @@ var Login=function(adminname,password,callback){
             dao.adminDao.getPassword(adminname,callback);
         },
         function(pass,callback) {
-            if (password === pass) {
-                dao.adminDao.getAdminIdAndScope(adminname,callback);
-            }
-            else
-                callback(new Error(errorMessages.INVALID_CREDENTIALS),null)
+            passhash(password).verifyAgainst(pass, function(error, verified) {
+                if(error)
+                    callback(new Error(errorMessages.SOMETHING_WRONG));
+
+                if(verified) {
+                    dao.adminDao.getAdminIdAndScope(adminname,callback);
+                }
+                else
+                    callback(new Error(errorMessages.INVALID_CREDENTIALS),null)
+            });
         },
         function(adminId,scope,callback) {
             if(adminId) {
@@ -69,12 +75,14 @@ var register=function(payload,callback) {
         email: payload.email,
         firstname: payload.firstname,
         lastname: payload.lastname,
-        password: payload.password,
         phone: payload.phone,
         scope: payload.scope
     };
     async.waterfall([function (callback) {
-        dao.adminDao.addAdmin(admin, callback);
+        passhash(password).hash(function(err,hash){
+            admin.password=hash;
+            dao.adminDao.addAdmin(admin, callback);
+        });
     }], function (err) {
         if (err) {
             console.log(err);

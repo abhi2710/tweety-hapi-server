@@ -11,9 +11,9 @@ var async=require('async'),
     dao=require('../DAO'),
     util=require('../util'),
     privateKey = Config.key.REGISTERPRIVATEKEY,
-    Constants=require('../Config/Constants'),
-    CONSTANTS=Constants.ROUTECONSTANTS,
-    errors=Constants.ERRORS;
+    Constants=require('../Config'),
+    errorMessages=Constants.responseMessages.ERROR_MESSAGES,
+    successMessages=Constants.responseMessages.SUCCESS_MESSAGES;
 
 var smtpTransport = nodemailer.createTransport("SMTP", {
     service: "Gmail",
@@ -72,7 +72,7 @@ function isAuth(recievedToken,model,callback){
             var decode = Jwt.decode(recievedToken);
         }
         catch (err) {
-            callback(new Error(errors.INVALID_TOKEN), null);
+            callback(new Error(errorMessages.INVALID_TOKEN), null);
             return;
         }
         callback(null,decode.userId)
@@ -90,7 +90,7 @@ function isAuth(recievedToken,model,callback){
                 });
             }
             else
-                callback(new Error(errors.NOT_AUTHORIZED));
+                callback(new Error(errorMessages.ACTION_NO_AUTH));
         },
         function (token,userId, callback) {
             if(model==='user') {
@@ -105,7 +105,7 @@ function isAuth(recievedToken,model,callback){
                     callback(null,true);
                 }
             }
-            else callback(new Error(errors.NOT_AUTHORIZED));
+            else callback(new Error(errorMessages.ACTION_NO_AUTH));
         }
     ], function (err, valid) {
         return callback(null,valid);
@@ -116,7 +116,7 @@ var verify=function(recievedToken,callback){
     async.waterfall([function (callback) {
         try{var decode = Jwt.decode(recievedToken);}
         catch(err) {
-            return callback(new Error(errors.INVALID_TOKEN))
+            return callback(new Error(errorMessages.INVALID_TOKEN))
         }
         dao.userDao.getUserId(decode.username,callback);
     },
@@ -137,7 +137,7 @@ var verify=function(recievedToken,callback){
         }
         else {
             result="";
-            return callback(null,util.createSuccessResponseMessage(CONSTANTS.VERIFYEMAIL,result));
+            return callback(null,util.createSuccessResponseMessage(successMessages.EMAIL_VERIFIED,result));
         }
     });
 };

@@ -2,6 +2,7 @@
  * Created by abhinav on 2/6/2016.
  */
 var verify = require('./../verificationController'),
+    passhash=require('password-hash-and-salt'),
     Jwt = require('jsonwebtoken'),
     Constants=require('../../Config'),
     dao = require('../../DAO/index'),
@@ -83,11 +84,16 @@ var Login=function(username,password,callback){
                 callback(new Error(errorMessages.USER_NOT_VERIFIED),null);
         },
         function(pass,callback) {
-            if (password === pass) {
-                dao.userDao.getUserId(username,callback)
-            }
-            else
-                callback(new Error(errorMessages.INVALID_CREDENTIALS),null)
+                passhash(password).verifyAgainst(pass, function(error, verified) {
+                    if(error)
+                        callback(new Error(errorMessages.SOMETHING_WRONG));
+
+                    if(verified) {
+                        dao.userDao.getUserId(username,callback)
+                    }
+                    else
+                        callback(new Error(errorMessages.INVALID_CREDENTIALS),null)
+                });
         },
         function(userId,callback) {
             if(userId) {
@@ -136,11 +142,13 @@ var register=function(email,username,firstname,lastname,password,phone,callback)
         username:username,
         firstname:firstname,
         lastname:lastname,
-        password:password,
         phone:phone
     };
     async.waterfall([function(callback){
-        dao.userDao.addUser(user,callback);
+        passhash(password).hash(function(err,hash){
+            user.password=hash;
+            dao.userDao.addUser(user,callback);
+        });
     },
         function(result,callback){
             dao.userDao.getUserId(username,callback);
@@ -161,6 +169,8 @@ var register=function(email,username,firstname,lastname,password,phone,callback)
         }
     });
 };
+
+
 module.exports={
     Login:Login,
     Logout:Logout,
