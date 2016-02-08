@@ -28,5 +28,32 @@ var adminhome={
         }
     }
 };
+var editUserProfile={
+    method: 'POST',
+    path:'/admin/editUserProfile',
+    handler: function (request, reply) {
+        controller.CRUDController.editUserProfile(request.headers.authorization,request.payload.username,
+            request.payload,function(err,result){
+            reply(result.response).code(result.statusCode);
+        });
+    },
+    config: {
+        description: 'Home',
+        notes: 'admin home route',
+        tags: ['api'],
+        validate: {
+            headers:Joi.object({
+                'authorization': Joi.string().required()
+            }).options({ allowUnknown: true }),
+            payload: {
+                username:Joi.string().required(),
+                email:Joi.string().email(),
+                firstname:Joi.string(),
+                lastname:Joi.string(),
+                phone:Joi.number()
+            }
+        }
+    }
+};
 
-module.exports=[adminhome];
+module.exports=[adminhome,editUserProfile];

@@ -4,6 +4,8 @@ var async=require('async'),
     Constants=require('../../Config/'),
     util=require('../../util'),
     verify=require('./../verificationController'),
+    key=require('../../Config/Constants'),
+    privateKey =key.KEYS.REGISTERPRIVATEKEY,
     errorMessages=Constants.responseMessages.ERROR_MESSAGES,
     successMessages=Constants.responseMessages.SUCCESS_MESSAGES;
 
@@ -171,10 +173,53 @@ var deleteUser=function(token,username,callback) {
     });
 };
 
+var editUserProfile=function(token,username,data,callback) {
+    async.waterfall([
+        function(callback) {
+            verify.isAuth(token,'admin',function(err,isAuthorized) {
+                if (isAuthorized) {
+                    delete data['username'];
+                    dao.userDao.getUserId(username,function(err,userId){
+                        dao.userDao.setUserDetails(userId,data,function(err,res){
+                            callback(err,userId);
+                        });
+                    });
+                }
+                else
+                    callback(new Error(errorMessages.ACTION_NO_AUTH),null);
+            });
+        },
+        function(userId,callback) {
+            if (data['email']) {
+                dao.userDao.setUserVerified(userId,false,function(err,doc) {
+                    callback(err,userId)
+                });
+            }
+            else
+                callback(null,null);
+        },
+        function(userId,callback){
+            var token = jwt.sign({
+                username: username,
+                timestamp: Date.now()
+            },privateKey);
+            dao.tokenDao.setToken(token, userId, function (err,res) {
+                verify.sentMailVerificationLink(data['email'],token);
+                callback(null);
+            });
+        }
+    ],function(err) {
+        if (err)
+            return callback(null, util.createErrorResponseMessage(err));
+        else
+            return callback(null, util.createSuccessResponseMessage(successMessages.DETAILS_SUBMITTED));
+    });
+};
 
 module.exports={
     showTweets:showTweets,
     display:display,
     deleteTweet:deleteTweet,
-    deleteUser:deleteUser
+    deleteUser:deleteUser,
+    editUserProfile:editUserProfile
 };

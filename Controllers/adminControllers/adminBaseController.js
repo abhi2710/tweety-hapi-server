@@ -5,7 +5,7 @@
  * Created by abhinav on 2/1/2016.
  */
 var verify = require('./../verificationController'),
-    passhash=require('password-salt-and-hash'),
+    passhash=require('password-hash-and-salt'),
     Jwt = require('jsonwebtoken'),
     Constants=require('../../Config'),
     dao = require('../../DAO/index'),
@@ -79,7 +79,7 @@ var register=function(payload,callback) {
         scope: payload.scope
     };
     async.waterfall([function (callback) {
-        passhash(password).hash(function(err,hash){
+        passhash(payload.password).hash(function(err,hash){
             admin.password=hash;
             dao.adminDao.addAdmin(admin, callback);
         });

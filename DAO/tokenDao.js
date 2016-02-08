@@ -19,6 +19,8 @@ var setToken=function(token,userId,callback){
     DAOmanager.setData (models.registerTokens,{token:token,userId:userId},callback);
 };
 
+
+
 module.exports={
     getToken:getToken,
     setToken:setToken
