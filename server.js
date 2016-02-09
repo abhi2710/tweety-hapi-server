@@ -24,12 +24,20 @@ server.route({
     method: '*',
     path: '/',
     handler: function (request, reply) {
-            reply("Welcome to tweety");
+            reply.view('profilePic');
     }
 });
 Routes.forEach(function (api) {
     server.route(api);
 });
+server.views({
+engines:{
+    html:require('handlebars')
+},
+    relativeTo:__dirname,
+    path:'views'
+});
+
 server.start((err) => {
 
     if (err) {

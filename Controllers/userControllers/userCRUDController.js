@@ -26,6 +26,8 @@ var display= function(token,display,tweet,username,callback) {
             break;
         case 'Unfollow':stopFollowing(token,username,callback);
             break;
+        case 'Re-Tweet':ReTweet(token,tweet,callback);
+            break;
     }
 };
 
@@ -248,6 +250,54 @@ var showTweets=function(token,callback) {
             }
         });
 };
+
+var ReTweet=function(token,tweet_id,callback) {
+    async.waterfall([
+        function(callback) {
+            verify.isAuth(token,"user", function (err, isAuthorized) {
+                if (isAuthorized) {
+                    try {
+                        var decode = jwt.decode(token);
+                        callback(null, decode.userId);
+                    }
+                    catch (err) {
+                        return callback(new Error(errorMessages.INVALID_TOKEN), null);
+                    }
+                }
+                else
+                    callback(new Error(errorMessages.ACTION_NO_AUTH), null);
+            });
+        },
+        function(userId,callback){
+            dao.tweetDao.getTweet(tweet_id,function(err,tweet,retweetedfrom){
+                callback(err,userId,tweet,retweetedfrom)
+            });
+        },
+        function(userId,tweet,retweetedfrom,callback){
+            var data={
+                userId:userId,
+                tweet_text:tweet,
+                time:new Date(new Date()).toISOString(),
+                retweetedfrom:retweetedfrom
+            };
+            dao.tweetDao.addTweet(userId,data,function(err,tweet){
+                callback(err,userId)
+            });
+        },
+        function(userId,callback){
+            dao.tweetDao.addReTweet(userId,tweet_id,callback);
+        }
+    ],function(err,tweet) {
+        if (err) {
+            return callback(null, util.createErrorResponseMessage(err));
+        }
+        else {
+            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE,tweet));
+        }
+    });
+};
+
+
 var postTweet=function(token,tweet,callback) {
     async.waterfall([
         function(callback) {
@@ -266,7 +316,12 @@ var postTweet=function(token,tweet,callback) {
             });
         },
         function(userId,callback){
-            dao.tweetDao.addTweet(userId,tweet,callback);
+            var data={
+                userId:userId,
+                tweet_text:tweet,
+                time:new Date(new Date()).toISOString()
+            };
+            dao.tweetDao.addTweet(userId,data,callback);
         }
     ],function(err,tweet) {
         if (err) {

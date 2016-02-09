@@ -70,12 +70,12 @@ function isAuth(recievedToken,model,callback){
     async.waterfall([function (callback) {
         try {
             var decode = Jwt.decode(recievedToken);
+            callback(null,decode.userId)
         }
         catch (err) {
             callback(new Error(errorMessages.INVALID_TOKEN), null);
             return;
         }
-        callback(null,decode.userId)
     },
         function(userId,callback)
         {

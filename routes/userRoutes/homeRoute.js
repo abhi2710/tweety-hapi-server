@@ -7,7 +7,8 @@ var home={
     method: 'POST',
     path:'/user/home',
     handler: function (request, reply) {
-                controller.userCRUDController.display(request.headers.authorization,request.payload.display,request.payload.tweet,request.payload.username,function(err,result){
+                controller.userCRUDController.display(request.headers.authorization,request.payload.display,request.payload.tweet,
+                    request.payload.username,function(err,result){
                     reply(result.response).code(result.statusCode);
         });
     },
@@ -20,8 +21,8 @@ var home={
                 'authorization': Joi.string().required()
             }).options({ allowUnknown: true }),
             payload: {
-                display:Joi.allow('Post Tweet','Tweets','Followers','Following','Users','Follow','Unfollow'),
-                tweet:Joi.string(),
+                display:Joi.allow('Post Tweet','Tweets','Followers','Following','Users','Follow','Unfollow','Re-Tweet'),
+                tweet:Joi.string().description("Enter tweet_id for retweeting"),
                 username:Joi.string()
             }
         }
@@ -30,9 +31,10 @@ var home={
 
 
 var editProfile={
-    method: 'Put',
+    method: 'PUT',
     path:'/user/editProfile',
-    handler: function (request, reply) {controller.userController.editProfile(request.headers.authorization,request.payload,
+    handler: function (request, reply) {
+     controller.userBaseController.editProfile(request.headers.authorization,request.payload,
         function(err,result){
             reply(result.response).code(result.statusCode);
         });
@@ -57,6 +59,33 @@ var editProfile={
         }
     }
 };
+
+//var getuserId={
+//    method: '*',
+//    path:'/user/getuserId',
+//    handler: function (request, reply) {
+//        console.log(request.body);
+//        request.on('data', function (chunk) {
+//            console.log('GOT DATA!');
+//        });
+//        controller.userBaseController.getuserId(request.payload.username,
+//        request.payload.password,
+//        function(err,result){
+//            reply(result.response).code(result.statusCode);
+//        });
+//    },
+//    config: {
+//        description: 'edit profile',
+//        notes: 'edit profile details',
+//        tags: ['api'],
+//        validate: {
+//            payload: {
+//                username: Joi.string(),
+//                password:Joi.string()
+//            }
+//        }
+//    }
+//};
 
 //var uploadProfilePic={
 //    method: 'POST',
