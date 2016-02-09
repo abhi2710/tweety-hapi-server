@@ -39,8 +39,9 @@ var getUserTweets=function(userId,callback) {
 
 var getTweet=function(tweet_id,callback) {
     DAOmanager.getData(models.tweet, {_id:tweet_id},{}, {},function (err,data) {
-        if (err) return console.error(err);
+        if (data)
         return callback(err,data.tweet_text,data.userId);
+        else return callback(err);
     });
 };
 

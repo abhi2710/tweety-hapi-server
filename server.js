@@ -1,6 +1,6 @@
 'use strict';
 var Routes = require('./routes'),
-    Plugins = require('./Plugins'),
+    Plugins = require('./plugins'),
     mongoose=require('mongoose');
 const Hapi = require('hapi'),
     server = new Hapi.Server();

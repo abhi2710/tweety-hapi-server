@@ -2,7 +2,7 @@
  * Created by abhinav on 2/6/2016.
  */
 var jwt = require('jsonwebtoken'),
-    async=require('Async'),
+    async=require('async'),
     dao=require('../../DAO/index'),
     Constants=require('../../Config'),
     util=require('../../util'),
