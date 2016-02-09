@@ -15,6 +15,12 @@ var addTweet=function(userId,tweet,callback) {
     });
 };
 
+var addReTweet=function(userId,tweet_id,callback) {
+    DAOmanager.findOneAndUpdateData(models.tweet,{_id:tweet_id},{$addToSet:{retweetedBy:userId}},{},function (err,doc) {
+        return callback(err,doc.tweet_text);
+    });
+};
+
 var deleteTweet=function(tweet_id,callback) {
     DAOmanager.update(models.tweet,{_id:tweet_id},{$set:{isDeleted:true}},{},function (err,doc) {
         return callback(err,doc.tweet_text);
@@ -33,6 +39,13 @@ var getUserTweets=function(userId,callback) {
             tweetsArr.push(tweet);
         }
         return callback(err,tweetsArr);
+    });
+};
+
+var getTweet=function(tweet_id,callback) {
+    DAOmanager.getData(models.tweet, {_id:tweet_id},{}, {},function (err,data) {
+        if (err) return console.error(err);
+        return callback(err,data.tweet_text);
     });
 };
 
@@ -61,5 +74,7 @@ module.exports={
     addTweet:addTweet,
     getTweets:getTweets,
     getUserTweets:getUserTweets,
-    deleteTweet:deleteTweet
+    deleteTweet:deleteTweet,
+    getTweet:getTweet,
+    addReTweet:addReTweet
 };

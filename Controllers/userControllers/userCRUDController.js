@@ -2,7 +2,7 @@
  * Created by abhinav on 2/6/2016.
  */
 var jwt = require('jsonwebtoken'),
-    async=require('Async'),
+    async=require('async'),
     dao=require('../../DAO/index'),
     Constants=require('../../Config'),
     util=require('../../util'),
@@ -25,6 +25,8 @@ var display= function(token,display,tweet,username,callback) {
         case 'Follow':startFollowing(token,username,callback);
             break;
         case 'Unfollow':stopFollowing(token,username,callback);
+            break;
+        case 'Re-Tweet':ReTweet(token,tweet,callback);
             break;
     }
 };
@@ -248,6 +250,48 @@ var showTweets=function(token,callback) {
             }
         });
 };
+
+var ReTweet=function(token,tweet_id,callback) {
+    async.waterfall([
+        function(callback) {
+            verify.isAuth(token,"user", function (err, isAuthorized) {
+                if (isAuthorized) {
+                    try {
+                        var decode = jwt.decode(token);
+                        callback(null, decode.userId);
+                    }
+                    catch (err) {
+                        return callback(new Error(errorMessages.INVALID_TOKEN), null);
+                    }
+                }
+                else
+                    callback(new Error(errorMessages.ACTION_NO_AUTH), null);
+            });
+        },
+        function(userId,callback){
+            dao.tweetDao.getTweet(tweet_id,function(err,tweet){
+                callback(err,userId,tweet)
+            });
+        },
+        function(userId,tweet,callback){
+            dao.tweetDao.addTweet(userId,tweet,function(err,tweet){
+                callback(err,userId)
+            });
+        },
+        function(userId,callback){
+            dao.tweetDao.addReTweet(userId,tweet_id,callback);
+        }
+    ],function(err,tweet) {
+        if (err) {
+            return callback(null, util.createErrorResponseMessage(err));
+        }
+        else {
+            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE,tweet));
+        }
+    });
+};
+
+
 var postTweet=function(token,tweet,callback) {
     async.waterfall([
         function(callback) {

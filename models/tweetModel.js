@@ -6,7 +6,8 @@ var tweetSchema=new mongoose.Schema({
     userId:{type:mongoose.Schema.ObjectId,required:true,ref:'users'},
     tweet_text:{type:String,required:true},
     time:{type:Date,required:true,default:new Date()},
-    isDeleted:{type:Boolean,deafult:false}
+    isDeleted:{type:Boolean,deafult:false},
+    retweetedBy:[{ type: mongoose.Schema.Types.ObjectId,ref:'users'}]
 });
 module.exports=mongoose.model("tweet",tweetSchema);
 

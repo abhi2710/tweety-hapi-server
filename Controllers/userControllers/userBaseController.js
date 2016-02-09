@@ -170,10 +170,30 @@ var register=function(email,username,firstname,lastname,password,phone,callback)
     });
 };
 
-
+var getuserId=function(username,password,callback){
+    async.waterfall([
+        function(callback){
+            dao.userDao.isRegistered(username,callback);
+        },
+        function(isregistered,callback){
+            if(isregistered===true)
+                dao.userDao.getUserId(username,callback);
+            else
+                callback(new Error(errorMessages.USER_NOT_VERIFIED),null);
+        }
+    ],function(err,userId) {
+        if(err) {
+            return callback(null,util.createErrorResponseMessage(err));
+        }
+        else {
+            return callback(null,util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE),userId);
+        }
+    });
+};
 module.exports={
     Login:Login,
     Logout:Logout,
     register:register,
-    editProfile:editProfile
+    editProfile:editProfile,
+    getuserId:getuserId
 };

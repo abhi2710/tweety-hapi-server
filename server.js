@@ -1,6 +1,6 @@
 'use strict';
 var Routes = require('./routes'),
-    Plugins = require('./Plugins'),
+    Plugins = require('./plugins'),
     mongoose=require('mongoose');
 const Hapi = require('hapi'),
     server = new Hapi.Server();
@@ -24,12 +24,20 @@ server.route({
     method: '*',
     path: '/',
     handler: function (request, reply) {
-            reply("Welcome to tweety");
+            reply.view('profilePic');
     }
 });
 Routes.forEach(function (api) {
     server.route(api);
 });
+server.views({
+engines:{
+    html:require('handlebars')
+},
+    relativeTo:__dirname,
+    path:'views'
+});
+
 server.start((err) => {
 
     if (err) {

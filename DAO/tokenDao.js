@@ -1,7 +1,7 @@
 /**
  * Created by abhinav on 1/22/2016.
  */
-var async=require('Async'),
+var async=require('async'),
     models=require('../models'),
     DAOmanager=require('./DAOmanager'),
     Constants=require('../Config/Constants'),
