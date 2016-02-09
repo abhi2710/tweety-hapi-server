@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ProfilePic</title>
+    <script src="jquery-1.12.0.min.js"></script>
+</head>
+<body>
+<script>
+    $(document).ready(function(){
+        $("#but1").click(function(data){
+            $.ajax({
+                url: 'localhost:8500/user/getuserId',
+                // dataType: "jsonp",
+                data: {
+                username:$("#text1").val(),
+                password:$("#text2").val()
+            },
+                type: 'POST',
+                jsonpCallback: 'callback', // this is not relevant to the POST anymore
+//                success: function (data) {
+//                    var ret = jQuery.parseJSON(data);
+//                    $('#lblResponse').html(ret.msg);
+//                    console.log('Success: ')
+//                },
+//                error: function (xhr, status, error) {
+//                    console.log('Error: ' + error.message);
+//                    $('#lblResponse').html('Error connecting to the server.');
+//                },
+            });
+        });
+    });
+</script>
+<form action="localhost:8500/" method="post" formenctype="multipart/form-data">
+    <p id="par1">this will contain _id</p>
+    <b>username</b><input id="text1" type="text" name="username">
+<br>
+    <b>Password</b> <input id="text2" type="password" name="password">
+<br>
+    <input type="button" id="but1" value="upload">
+</form>
+</body>
+</html>

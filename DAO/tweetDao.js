@@ -4,6 +4,7 @@
 var models=require('../models'),
     DAOmanager=require('../DAO/DAOmanager');
 
+
 var addTweet=function(userId,data,callback) {
     DAOmanager.setData(models.tweet,data,function (err,doc) {
         return callback(err,doc.tweet_text);
@@ -39,6 +40,7 @@ var getUserTweets=function(userId,callback) {
 
 var getTweet=function(tweet_id,callback) {
     DAOmanager.getData(models.tweet, {_id:tweet_id},{}, {},function (err,data) {
+
         if (data)
         return callback(err,data.tweet_text,data.userId);
         else return callback(err);
@@ -58,23 +60,24 @@ var getTweets=function(followers,callback) {
         options: { lean:true }
     },function (err,data) {
         if (err) return console.error(err);
-        var tweetsArr=[];
-        console.log(data);
-        for(key in data) {
+        var tweetsArr = [];
+        for (key in data) {
             var tweet = {};
             tweet['username'] = data[key].userId.username;
             tweet['firstname'] = data[key].userId.firstname;
             tweet['lastname'] = data[key].userId.lastname;
             tweet['tweet'] = data[key].tweet_text;
             tweet['time'] = data[key].time;
-            if(data[key].retweetedfrom){
-                tweet['Retweetedfrom']=data[key].retweetedfrom.username;
+            if (data[key].retweetedfrom) {
+                tweet['Retweetedfrom'] = data[key].retweetedfrom.username;
             }
-            tweetsArr.push(tweet);
+            tweetsArr.push(tweet)
         }
-        return callback(err,tweetsArr);
+            if (err) return console.error(err);
+            return callback(err,tweetsArr);
     });
 };
+
 
 
 //var getTweets=function(followers,callback) {
@@ -101,7 +104,7 @@ var getTweets=function(followers,callback) {
 //        }
 //        return callback(err,tweetsArr);
 //    });
-//};
+//}
 module.exports={
     addTweet:addTweet,
     getTweets:getTweets,

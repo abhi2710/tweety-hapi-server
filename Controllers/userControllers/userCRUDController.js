@@ -274,6 +274,11 @@ var ReTweet=function(token,tweet_id,callback) {
             });
         },
         function(userId,tweet,retweetedfrom,callback){
+            dao.tweetDao.getTweet(tweet_id,function(err,tweet){
+                callback(err,userId,tweet,retweetedfrom)
+            });
+        },
+        function(userId,tweet,retweetedfrom,callback){
             var data={
                 userId:userId,
                 tweet_text:tweet,
