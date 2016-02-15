@@ -21,8 +21,8 @@ var home={
                 'authorization': Joi.string().required()
             }).options({ allowUnknown: true }),
             payload: {
-                display:Joi.allow('Post Tweet','Tweets','Followers','Following','Users','Follow','Unfollow','Re-Tweet'),
-                tweet:Joi.string().description("Enter tweet_id for retweeting"),
+                display:Joi.allow('Post Tweet','Tweets','Followers','Following','Users','Follow','Unfollow','Re-Tweet','like tweet','unlike tweet'),
+                tweet:Joi.string().description("Enter tweet_id for retweeting,liking and unliking"),
                 username:Joi.string()
             }
         }
@@ -65,8 +65,9 @@ var editProfile={
 //    path:'/user/getuserId',
 //    handler: function (request, reply) {
 //        console.log(request.body);
-//        request.on('data', function (chunk) {
+//        request.on('data', function (data) {
 //            console.log('GOT DATA!');
+//            console.log(data);
 //        });
 //        controller.userBaseController.getuserId(request.payload.username,
 //        request.payload.password,

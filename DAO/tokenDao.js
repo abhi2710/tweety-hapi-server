@@ -3,9 +3,7 @@
  */
 var async=require('async'),
     models=require('../models'),
-    DAOmanager=require('./DAOmanager'),
-    Constants=require('../Config/Constants'),
-    errors=Constants.ERRORS;
+    DAOmanager=require('./DAOmanager');
 
 var getToken=function(userId,callback){
     DAOmanager.getData(models.registerTokens,{userId:userId},{},function(err,document){

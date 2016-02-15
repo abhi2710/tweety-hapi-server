@@ -130,7 +130,7 @@ var Logout=function(token,callback){
             callback(new Error(errors.NOT_AUTHORIZED), null);
     });
 };
-var register=function(email,username,firstname,lastname,password,phone,callback)
+var register=function(email,username,firstname,lastname,password,phone,lat,long,callback)
 {
     var tokenData = {
         username:username,
@@ -142,7 +142,10 @@ var register=function(email,username,firstname,lastname,password,phone,callback)
         username:username,
         firstname:firstname,
         lastname:lastname,
-        phone:phone
+        phone:phone,
+        location:{
+            coordinates:[lat,long]
+        }
     };
     async.waterfall([function(callback){
         passhash(password).hash(function(err,hash){
@@ -151,7 +154,7 @@ var register=function(email,username,firstname,lastname,password,phone,callback)
         });
     },
         function(result,callback){
-            dao.userDao.getUserId(username,callback);
+                dao.userDao.getUserId(username,callback);
         },
         function(userId,callback){
             dao.tokenDao.setToken(token,userId,function(err) {

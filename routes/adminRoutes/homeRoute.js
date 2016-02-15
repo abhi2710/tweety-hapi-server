@@ -8,7 +8,9 @@ var adminhome={
     method: 'POST',
     path:'/admin/home',
     handler: function (request, reply) {
-        controller.CRUDController.display(request.headers.authorization,request.payload.Action,request.payload.username,request.payload.tweetId,function(err,result){
+        controller.CRUDController.display(request.headers.authorization,request.payload.Action,request.payload.username,request.payload.tweetId,
+            request.payload.radius,request.payload.latitude,request.payload.longitude,
+            function(err,result){
             reply(result.response).code(result.statusCode);
         });
     },
@@ -21,9 +23,12 @@ var adminhome={
                 'authorization': Joi.string().required()
             }).options({ allowUnknown: true }),
             payload: {
-                Action:Joi.allow('Show Users','Delete User','Show User Profile','Delete Tweet','Show Tweets of a User','edit User Profile'),
+                Action:Joi.allow('show nearby users','Show Users','Delete User','Show User Profile','Delete Tweet','Show Tweets of a User','edit User Profile'),
                 username:Joi.string(),
-                tweetId:Joi.string()
+                tweetId:Joi.string(),
+                radius:Joi.number().description("distance in miles"),
+                latitude:Joi.number(),
+                longitude:Joi.number()
             }
         }
     }

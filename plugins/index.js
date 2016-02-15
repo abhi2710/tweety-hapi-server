@@ -6,6 +6,7 @@ var Inert = require('inert'),
 module.exports = [
     Inert,
     Vision,
+    {register:require('./chat/index')},
     {register: require('./swagger')},
     {register: require('./good-console')}
 ];

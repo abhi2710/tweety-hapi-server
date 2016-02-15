@@ -13,7 +13,18 @@ var userSchema=new mongoose.Schema({
     isDeleted:{type:Boolean,required:true,default:false},
     accessToken:{type:String,default:0},
     following:[{ type: mongoose.Schema.Types.ObjectId,ref:'users'}],
-    followers:[{ type: mongoose.Schema.Types.ObjectId,ref:'users'}]
+    followers:[{ type: mongoose.Schema.Types.ObjectId,ref:'users'}],
+    location: {
+        type: {
+            type: String,
+            enum: ['Point', 'LineString', 'Polygon'],
+            default: 'Point'
+        },
+        coordinates: [Number]
+    }
 });
+
+userSchema.index({ location : '2dsphere' });
+
 module.exports=mongoose.model("users",userSchema);
 

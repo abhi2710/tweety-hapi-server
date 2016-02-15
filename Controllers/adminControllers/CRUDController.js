@@ -9,7 +9,7 @@ var async=require('async'),
     errorMessages=Constants.responseMessages.ERROR_MESSAGES,
     successMessages=Constants.responseMessages.SUCCESS_MESSAGES;
 
-var display= function(token,display,username,tweet_id,callback) {
+var display= function(token,display,username,tweet_id,radius,lat,long,callback) {
     switch (display) {
         case 'Show Users':showUsers(token,callback);
             break;
@@ -21,9 +21,33 @@ var display= function(token,display,username,tweet_id,callback) {
             break;
         case 'Delete Tweet':deleteTweet(token,tweet_id,callback);
             break;
+        case 'show nearby users':showNearbyUser(token,radius,lat,long,callback);
+            break;
         default :showUsers(token,callback);
             break;
     }
+};
+
+var showNearbyUser=function(token,radius,lat,long,callback) {
+    async.waterfall([
+        function(callback){
+            verify.isAuth(token,'admin',function(err,isAuthorized) {
+                if (isAuthorized) {
+                    dao.userDao.getNearbyUsers(radius,lat,long,callback);
+                }
+                else
+                    callback(new Error(errorMessages.ACTION_NO_AUTH), null);
+            });
+        }
+    ],function(err,data)
+    {
+        if (err) {
+            return callback(null, util.createErrorResponseMessage(err));
+        }
+        else {
+            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE,data));
+        }
+    });
 };
 
 var showUsers=function(token,callback) {

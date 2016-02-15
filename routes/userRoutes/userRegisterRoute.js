@@ -9,7 +9,7 @@ var Register={
     path:'/user/register',
     handler: function (request, reply) {
         controller.userBaseController.register(request.payload.email,request.payload.username,request.payload.firstname,request.payload.lastname,
-            request.payload.password,request.payload.phone,function(err,result){
+            request.payload.password,request.payload.phone,request.payload.latitude,request.payload.longitute,function(err,result){
                 reply(result.response).code(result.statusCode);
             });
     },
@@ -24,7 +24,9 @@ var Register={
                 firstname:Joi.string().required(),
                 lastname:Joi.string().required(),
                 password:Joi.string().required(),
-                phone:Joi.number().required()
+                phone:Joi.number().required(),
+                latitude:Joi.number(),
+                longitute:Joi.number()
             }
         }
     }
@@ -50,8 +52,10 @@ var Login={
     method: 'POST',
     path:'/user/login',
     handler: function (request, reply) {
+        console.log(request.payload);
         controller.userBaseController.Login(request.payload.username,
             request.payload.password,function(err,result,token){
+
                 reply(result.response.message).header("authorization",token).code(result.statusCode);
             });
     },

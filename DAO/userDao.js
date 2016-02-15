@@ -117,6 +117,24 @@ var getFollowingId=function(userId,callback) {
             return callback(err,data);
     });
 };
+
+var getNearbyUsers=function(radius,lat,long,callback) {
+    DAOmanager.getallData(models.users,{location:{
+        $geoWithin : { $centerSphere :
+        [ [lat,long ] ,radius/3963.2 ]
+    }}},{},{},function (err, data) {
+        if(data) {
+            var users=[];
+            for(key in data) {
+                users.push(data[key].username);
+            }
+            return callback(err,users);
+        }
+        else
+            return callback(err,data);
+    });
+};
+
 var getUsers=function(callback) {
     DAOmanager.getallData(models.users,{}, {}, {}, function (err, data) {
         if(data) {
@@ -205,5 +223,6 @@ module.exports={
     removefromFollowersofothers:removefromFollowersofothers,
     isRegistered:isRegistered,
     getUser:getUser,
-    deleteUser:deleteUser
+    getNearbyUsers:getNearbyUsers,
+    deleteUser:deleteUser,
 };

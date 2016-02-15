@@ -7,6 +7,7 @@ var tweetSchema=new mongoose.Schema({
     tweet_text:{type:String,required:true},
     time:{type:Date,required:true,default:new Date()},
     isDeleted:{type:Boolean,deafult:false},
+    likes:[{type:mongoose.Schema.ObjectId,ref:'users'}],
     retweetedBy:[{ type: mongoose.Schema.Types.ObjectId,ref:'users'}],
     retweetedfrom:{type:mongoose.Schema.ObjectId,ref:'users'}
 });

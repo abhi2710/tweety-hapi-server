@@ -1,9 +1,6 @@
 /**
  * Created by abhinav on 2/9/2016.
  */
-/**
- * Created by abhinav on 2/9/2016.
- */
 var mongoose = require('mongoose');
 require('mongoose-type-url');
 
@@ -19,7 +16,7 @@ var EmployeeSchema=new mongoose.Schema({
         description:{type:String}
     }],
     isLookingForJob:{type:Boolean,default:true},
-    industry:{type:String,enum:['IT/SOFTWARE','SALES/MARKETING','WRITING/CONTENT','DESIGN/ARCHITECTURE'],required:true},
+    industry:{type:String,required:true},
     OrganizationSize:{type:Number},
     Description:{type:String},
     location: {

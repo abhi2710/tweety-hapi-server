@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    $("button").click(function () {
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:8500/user/login",
+            cache:false,
+            data: {
+                username: $("#text1").val(),
+                password: $("#pass1").val()
+            },
+            async: true,
+
+            success: function(data) {
+                console.log(data);
+                alert(data);
+                prompt("dd","ff","gg");
+                //data - response from server
+            },
+//            error: function(xhr){
+//                alert("An error occured: " + xhr.status + " " + xhr.statusText);
+//            }
+        });
+    });
+});
+
+</script>
+<div id="div1">abhinav</div>
+<form method="post">
+    <input type="text" name="username" id="text1" placeholder="USER NAME">
+    <input type="password" id="pass1" name="password" placeholder="PASSWORD">
+    <button>login</button>
+</form>
+</body>
+</html>

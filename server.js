@@ -20,13 +20,15 @@ mongoose.connect('mongodb://localhost/Tweetydb');
 mongoose.connection.once('connected', function() {
     console.log("Connected to database Tweetydb")
 });
+
 server.route({
     method: '*',
-    path: '/',
+    path: '/login',
     handler: function (request, reply) {
-            reply.view('profilePic');
+        reply.view('./signin');
     }
 });
+
 Routes.forEach(function (api) {
     server.route(api);
 });

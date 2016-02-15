@@ -28,7 +28,87 @@ var display= function(token,display,tweet,username,callback) {
             break;
         case 'Re-Tweet':ReTweet(token,tweet,callback);
             break;
+        case 'like tweet':likeTweet(token,tweet,callback);
+            break;
+        case 'unlike tweet':unlikeTweet(token,tweet,callback);
+            break;
     }
+};
+
+var likeTweet=function(token,tweet,callback) {
+    async.waterfall([
+        function(callback) {
+            if(tweet==="")
+                callback(new Error(errorMessages.WRONG_PARAMETER), null);
+            verify.isAuth(token,'user',function(err,isAuthorized) {
+                if (isAuthorized) {
+                    try {
+                        var decode = jwt.decode(token);
+                        callback(null,decode.userId);
+                    }
+                    catch (err) {
+                        callback(new Error(errorMessages.INVALID_TOKEN), null);
+                    }
+
+                }
+                else
+                    callback(new Error(errorMessages.ACTION_NO_AUTH), null);
+            });
+        },
+        function(userId,callback){
+            if(userId){
+                dao.tweetDao.likeTweet(tweet,userId,callback);
+                }
+            else
+            callback(new Error(errorMessages.INVALID_TOKEN),false)
+        }
+    ],function(err) {
+        if (err) {
+            console.log(err);
+            return callback(null, util.createErrorResponseMessage(err));
+        }
+        else {
+            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE));
+        }
+    });
+};
+
+var unlikeTweet=function(token,tweet,callback) {
+    async.waterfall([
+        function(callback) {
+            if(tweet==="")
+                callback(new Error(errorMessages.WRONG_PARAMETER), null);
+            verify.isAuth(token,'user',function(err,isAuthorized) {
+                if (isAuthorized) {
+                    try {
+                        var decode = jwt.decode(token);
+                        callback(null,decode.userId);
+                    }
+                    catch (err) {
+                        callback(new Error(errorMessages.INVALID_TOKEN), null);
+                    }
+
+                }
+                else
+                    callback(new Error(errorMessages.ACTION_NO_AUTH), null);
+            });
+        },
+        function(userId,callback){
+            if(userId){
+                dao.tweetDao.unlikeTweet(tweet,userId,callback);
+            }
+            else
+                callback(new Error(errorMessages.INVALID_TOKEN),false)
+        }
+    ],function(err) {
+        if (err) {
+            console.log(err);
+            return callback(null, util.createErrorResponseMessage(err));
+        }
+        else {
+            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE));
+        }
+    });
 };
 
 var startFollowing=function(token,followUsername,callback) {
@@ -285,7 +365,7 @@ var ReTweet=function(token,tweet_id,callback) {
                 time:new Date(new Date()).toISOString(),
                 retweetedfrom:retweetedfrom
             };
-            dao.tweetDao.addTweet(userId,data,function(err,tweet){
+            dao.tweetDao.addTweet(userId,data,function(err){
                 callback(err,userId)
             });
         },
