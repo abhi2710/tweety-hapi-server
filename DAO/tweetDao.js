@@ -10,7 +10,7 @@ var likeTweet=function(tweetId,userId,callback) {
     });
 };
 
-var unlikeTweet=function(userId,data,callback) {
+var unlikeTweet=function(tweetId,userId,callback) {
     DAOmanager.update(models.tweet,{_id:tweetId},{$pull:{likes:userId}},{},function (err,doc) {
         return callback(err);
     });
@@ -33,26 +33,25 @@ var deleteTweet=function(tweet_id,callback) {
         return callback(err,doc.tweet_text);
     });
 };
-
-var getUserTweets=function(userId,callback) {
-    DAOmanager.getallData(models.tweet, {userId:userId},{}, {},function (err,data) {
-        if (err) return console.error(err);
-        var tweetsArr=[];
-        for(key in data) {
-            var tweet={};
-            tweet['tweet']=data[key].tweet_text;
-            tweet['time']=data[key].time;
-            tweet['isDeleted']=data[key].isDeleted;
-            tweet['likes']=data[key].likes;
-            tweetsArr.push(tweet);
-        }
-        return callback(err,tweetsArr);
-    });
-};
+//
+//var getUserTweets=function(userId,callback) {
+//    DAOmanager.getallData(models.tweet, {userId:userId},{}, {},function (err,data) {
+//        if (err) return console.error(err);
+//        var tweetsArr=[];
+//        for(key in data) {
+//            var tweet={};
+//            tweet['tweet']=data[key].tweet_text;
+//            tweet['time']=data[key].time;
+//            tweet['isDeleted']=data[key].isDeleted;
+//            tweet['likes']=data[key].likes;
+//            tweetsArr.push(tweet);
+//        }
+//        return callback(err,tweetsArr);
+//    });
+//};
 
 var getTweet=function(tweet_id,callback) {
     DAOmanager.getData(models.tweet, {_id:tweet_id},{}, {},function (err,data) {
-
         if (data)
         return callback(err,data.tweet_text,data.userId);
         else return callback(err);
@@ -61,15 +60,11 @@ var getTweet=function(tweet_id,callback) {
 
 
 var getTweets=function(followers,callback) {
-    DAOmanager.getDataDeepPopulateThreeLevel(models.tweet, {userId:{$in:followers}},{}, {},{
-        path: 'userId',
+    DAOmanager.getDataWithReference(models.tweet, {userId:{$in:followers}},{}, {}, {
+        path: 'userId retweetedfrom',
         select: 'username firstname lastname',
         // match:{'isDeleted':"false"},
-        options: { lean:true,sort:{time:-1} }
-    },{
-        path: 'retweetedfrom',
-        select: 'username',
-        options: { lean:true }
+        options: {lean: true, sort: {time: -1}}
     },function (err,data) {
         if (err) return console.error(err);
         var tweetsArr = [];
@@ -86,10 +81,11 @@ var getTweets=function(followers,callback) {
             }
             tweetsArr.push(tweet)
         }
-            if (err) return console.error(err);
-            return callback(err,tweetsArr);
+        if (err) return console.error(err);
+        return callback(err,tweetsArr);
     });
 };
+
 
 
 module.exports={
@@ -98,7 +94,6 @@ module.exports={
     likeTweet:likeTweet,
     unlikeTweet:unlikeTweet,
     getTweets:getTweets,
-    getUserTweets:getUserTweets,
     getTweet:getTweet,
     deleteTweet:deleteTweet
 };

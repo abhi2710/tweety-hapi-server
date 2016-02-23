@@ -39,6 +39,9 @@ var createErrorResponseMessage=function(err){
             case errorMessages.INVALID_CREDENTIALS:error.response.message = errorMessages.INVALID_CREDENTIALS;
                 error.statusCode=401;
                 break;
+            case errorMessages.IMAGE_FORMAT_NOT_SUPPORTED:error.response.message = errorMessages.IMAGE_FORMAT_NOT_SUPPORTED;
+                error.statusCode=400;
+                break;
             default:error.response.message =errorMessages.SOMETHING_WRONG;
                 break;
         }

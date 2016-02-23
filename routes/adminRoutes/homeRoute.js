@@ -23,7 +23,8 @@ var adminhome={
                 'authorization': Joi.string().required()
             }).options({ allowUnknown: true }),
             payload: {
-                Action:Joi.allow('show nearby users','Show Users','Delete User','Show User Profile','Delete Tweet','Show Tweets of a User','edit User Profile'),
+                Action:Joi.allow('show nearby users','Show Users','Delete User','Show User Profile','Delete Tweet',
+                    'Show Tweets of a User'),
                 username:Joi.string(),
                 tweetId:Joi.string(),
                 radius:Joi.number().description("distance in miles"),
@@ -33,6 +34,28 @@ var adminhome={
         }
     }
 };
+var showusersonmap={
+    method: 'POST',
+    path:'/admin/showusersonmap',
+    handler: function (request, reply) {
+        controller.CRUDController.showUsers(request.payload.authorization,function(err,result){
+           // reply.view('./signin',result);
+            console.log(result);
+          reply(result.response.data);
+            });
+    },
+    config: {
+        description: 'Home',
+        notes: 'admin home route',
+        tags: ['api'],
+        validate: {
+            payload: {
+                'authorization': Joi.string().required()
+            }
+        }
+    }
+};
+
 var editUserProfile={
     method: 'POST',
     path:'/admin/editUserProfile',
@@ -61,4 +84,4 @@ var editUserProfile={
     }
 };
 
-module.exports=[adminhome,editUserProfile];
+module.exports=[adminhome,editUserProfile,showusersonmap];

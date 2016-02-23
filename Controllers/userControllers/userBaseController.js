@@ -32,7 +32,7 @@ var editProfile=function(token,data,callback) {
             });
         },
         function(userId,callback){
-            dao.userDao.getPasswordbyId(userId,function(err,pass) {
+            dao.userDao.getPassword(userId,function(err,pass) {
                 if (pass===data['oldpassword']) {
                     console.log("dbpass:"+pass);
                     console.log("oldpass:"+data['oldpassword']);
@@ -75,25 +75,19 @@ var editProfile=function(token,data,callback) {
 var Login=function(username,password,callback){
     async.waterfall([
         function(callback){
-            dao.userDao.isRegistered(username,callback);
-        },
-        function(isregistered,callback){
-            if(isregistered===true)
                 dao.userDao.getPassword(username,callback);
-            else
-                callback(new Error(errorMessages.USER_NOT_VERIFIED),null);
         },
         function(pass,callback) {
-                passhash(password).verifyAgainst(pass, function(error, verified) {
-                    if(error)
-                        callback(new Error(errorMessages.SOMETHING_WRONG));
+            passhash(password).verifyAgainst(pass, function(error, verified) {
+                if(error)
+                    callback(new Error(errorMessages.SOMETHING_WRONG));
 
-                    if(verified) {
-                        dao.userDao.getUserId(username,callback)
-                    }
-                    else
-                        callback(new Error(errorMessages.INVALID_CREDENTIALS),null)
-                });
+                if(verified) {
+                    dao.userDao.getUserId(username,callback)
+                }
+                else
+                    callback(new Error(errorMessages.INVALID_CREDENTIALS),null)
+            });
         },
         function(userId,callback) {
             if(userId) {
@@ -154,7 +148,7 @@ var register=function(email,username,firstname,lastname,password,phone,lat,long,
         });
     },
         function(result,callback){
-                dao.userDao.getUserId(username,callback);
+            dao.userDao.getUserId(username,callback);
         },
         function(userId,callback){
             dao.tokenDao.setToken(token,userId,function(err) {

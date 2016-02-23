@@ -33,6 +33,11 @@
     "serve-favicon": "~2.3.0",
     "swagger": "^0.7.5",
     "vision": "^4.0.1",
-    "socket.io": "~1.4.5"
+    "socket.io": "~1.4.5",
+    "multiparty": "~4.1.2",
+    "fs": "0.0.2",
+    "formidable": "~1.0.17",
+    "busboy": "~0.2.12",
+    "filetype": "~0.1.0"
   }
 }

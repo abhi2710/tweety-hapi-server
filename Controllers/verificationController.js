@@ -5,7 +5,6 @@ var async=require('async'),
     Jwt=require('jsonwebtoken'),
     Config = require('../Config/email'),
     nodemailer = require("nodemailer"),
-    crypto = require('crypto'),
     algorithm = 'aes-256-ctr',
     models=require('../models'),
     dao=require('../DAO'),
@@ -37,22 +36,6 @@ exports.sentMailForgotPassword = function(user,callback) {
         return callback(err,response);
     });
 };
-
-// method to decrypt data(password)
-function decrypt(password) {
-    var decipher = crypto.createDecipher(algorithm, privateKey);
-    var dec = decipher.update(password, 'hex', 'utf8');
-    dec += decipher.final('utf8');
-    return dec;
-}
-
-// method to encrypt data(password)
-function encrypt(password) {
-    var cipher = crypto.createCipher('aes-256-ctr', privateKey);
-    var crypted = cipher.update(password, 'utf8', 'hex');
-    crypted += cipher.final('hex');
-    return crypted;
-}
 
 function mail(from, email, subject, mailbody){
     var mailOptions = {
@@ -93,18 +76,11 @@ function isAuth(recievedToken,model,callback){
                 callback(new Error(errorMessages.ACTION_NO_AUTH));
         },
         function (token,userId, callback) {
-            if(model==='user') {
-                if (token === recievedToken) {
-                    dao.userDao.getUsername(userId,function(err,username) {
-                        dao.userDao.isRegistered(username,callback);
-                    });
-                }
-            }
-            else if(model==='admin') {
+
+
                 if(token===recievedToken) {
                     callback(null,true);
                 }
-            }
             else callback(new Error(errorMessages.ACTION_NO_AUTH));
         }
     ], function (err, valid) {
@@ -142,17 +118,8 @@ var verify=function(recievedToken,callback){
     });
 };
 
-var Decrypt=function(password,callback){
-    return callback(null,decrypt(password));
-};
-
-var Encrypt=function(password,callback){
-    return callback(null,encrypt(password));
-};
 module.exports={
     verify:verify,
     sentMailVerificationLink:sentMailVerificationLink,
-    isAuth:isAuth,
-    Encrypt:Encrypt,
-    Decrypt:Decrypt
+    isAuth:isAuth
 };

@@ -1,9 +1,14 @@
 var models=require('../models'),
-    DAOmanager=require('./DAOmanager');
+    DAOmanager=require('./DAOmanager'),
+    Constants=require('../Config'),
+    errorMessages=Constants.responseMessages.ERROR_MESSAGES;
 
 var getPassword=function(username,callback){
     DAOmanager.getData(models.users,{username:username},{},function(err,document){
+        if(document.isVerified)
         return callback(err,document.password);
+        else
+         return callback(new Error(errorMessages.USER_NOT_VERIFIED),null);
     });
 };
 
@@ -15,7 +20,10 @@ var getPasswordbyId=function(userId,callback){
 
 var getAccessToken=function(userId,callback){
     DAOmanager.getData(models.users,{_id:userId},{},function(err,document) {
+        if(document.isVerified)
         return callback(err, document.accessToken);
+        else
+        return callback(new Error(errorMessages.USER_NOT_VERIFIED));
     });
 };
 
@@ -38,6 +46,7 @@ var isRegistered=function(username,callback) {
         return callback(err, document.isVerified);
     });
 };
+
 var getUserId=function(username,callback){
     DAOmanager.getData(models.users, {username:username}, {}, function (err, document) {
         if(document)
@@ -140,7 +149,10 @@ var getUsers=function(callback) {
         if(data) {
             var users=[];
             for(key in data) {
-                users.push(data[key].username);
+                var user={};
+                user['username']=data[key].username;
+                user['location']=data[key].location.coordinates;
+                users.push(user);
             }
             return callback(err,users);
         }
@@ -224,5 +236,5 @@ module.exports={
     isRegistered:isRegistered,
     getUser:getUser,
     getNearbyUsers:getNearbyUsers,
-    deleteUser:deleteUser,
+    deleteUser:deleteUser
 };

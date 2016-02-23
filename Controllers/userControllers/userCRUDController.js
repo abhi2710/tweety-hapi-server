@@ -7,10 +7,12 @@ var jwt = require('jsonwebtoken'),
     Constants=require('../../Config'),
     util=require('../../util'),
     verify=require('./../verificationController'),
+    fs=require('fs'),
     errorMessages=Constants.responseMessages.ERROR_MESSAGES,
     successMessages=Constants.responseMessages.SUCCESS_MESSAGES;
 
 var display= function(token,display,tweet,username,callback) {
+
     switch (display) {
         case 'Post Tweet':postTweet(token,tweet,callback);
             break;
@@ -58,9 +60,9 @@ var likeTweet=function(token,tweet,callback) {
         function(userId,callback){
             if(userId){
                 dao.tweetDao.likeTweet(tweet,userId,callback);
-                }
+            }
             else
-            callback(new Error(errorMessages.INVALID_TOKEN),false)
+                callback(new Error(errorMessages.INVALID_TOKEN),false)
         }
     ],function(err) {
         if (err) {
@@ -101,13 +103,10 @@ var unlikeTweet=function(token,tweet,callback) {
                 callback(new Error(errorMessages.INVALID_TOKEN),false)
         }
     ],function(err) {
-        if (err) {
-            console.log(err);
+        if (err)
             return callback(null, util.createErrorResponseMessage(err));
-        }
-        else {
+        else
             return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE));
-        }
     });
 };
 
@@ -330,7 +329,6 @@ var showTweets=function(token,callback) {
             }
         });
 };
-
 var ReTweet=function(token,tweet_id,callback) {
     async.waterfall([
         function(callback) {
@@ -350,12 +348,7 @@ var ReTweet=function(token,tweet_id,callback) {
         },
         function(userId,callback){
             dao.tweetDao.getTweet(tweet_id,function(err,tweet,retweetedfrom){
-                callback(err,userId,tweet,retweetedfrom)
-            });
-        },
-        function(userId,tweet,retweetedfrom,callback){
-            dao.tweetDao.getTweet(tweet_id,function(err,tweet){
-                callback(err,userId,tweet,retweetedfrom)
+                callback(err,userId,tweet,retweetedfrom);
             });
         },
         function(userId,tweet,retweetedfrom,callback){
@@ -417,8 +410,63 @@ var postTweet=function(token,tweet,callback) {
         }
     });
 };
+
+var uploadProfilePic=function(token,req,callback) {
+    async.waterfall([
+        function(callback) {
+            verify.isAuth(token,"user", function (err, isAuthorized) {
+                if (isAuthorized) {
+                    try {
+                        var decode = jwt.decode(token);
+                        callback(null, decode.userId);
+                    }
+                    catch (err) {
+                        return callback(new Error(errorMessages.INVALID_TOKEN), null);
+                    }
+                }
+                else
+                    callback(new Error(errorMessages.ACTION_NO_AUTH), null);
+            });
+        },
+        function(userId,callback) {
+            if (req.payload['file'] && req.payload['file'][0] !== 'undefined') {
+                var file = req.payload['file'];
+                var headers=file.hapi.headers;
+                if (headers['content-type']) {
+                    var ext=headers['content-type'].split('/');
+                    console.log(ext);
+                    if(ext[0]==="image"){
+                        var path = __dirname + "/uploads/" + userId+"."+ext[1];
+                        var newfile = fs.createWriteStream(path);
+                        newfile.on('error', function (err) {
+                            console.log(err);
+                            callback(new Error(errorMessages.SOMETHING_WRONG));
+                        });
+                        file.pipe(newfile);
+                        file.on('end', function (err) {
+                            callback(null,userId);
+                        });
+                    }
+                    else
+                    callback(new Error(errorMessages.IMAGE_FORMAT_NOT_SUPPORTED));
+                }
+                else
+                    return callback(new Error(errorMessages.UPLOAD_ERROR));
+            }
+        }
+    ],function(err) {
+        if (err) {;
+            return callback(null, util.createErrorResponseMessage(err));
+        }
+        else {
+            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE));
+        }
+    });
+};
+
 module.exports={
     showTweets:showTweets,
     postTweet:postTweet,
-    display:display
+    display:display,
+    uploadProfilePic:uploadProfilePic
 };

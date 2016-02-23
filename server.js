@@ -23,7 +23,7 @@ mongoose.connection.once('connected', function() {
 
 server.route({
     method: '*',
-    path: '/login',
+    path: '/signin',
     handler: function (request, reply) {
         reply.view('./signin');
     }

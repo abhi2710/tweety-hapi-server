@@ -16,9 +16,7 @@ var userSchema=new mongoose.Schema({
     followers:[{ type: mongoose.Schema.Types.ObjectId,ref:'users'}],
     location: {
         type: {
-            type: String,
-            enum: ['Point', 'LineString', 'Polygon'],
-            default: 'Point'
+            type: String, enum: ['Point', 'LineString', 'Polygon'], default: 'Point'
         },
         coordinates: [Number]
     }

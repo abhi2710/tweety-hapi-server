@@ -5,9 +5,6 @@ var async=require('async'),
     models=require('../models'),
     DAOmanager=require('./DAOmanager');
 
-
-
-
 db.users.aggregate([
     {
         $geoNear: {
@@ -17,8 +14,8 @@ db.users.aggregate([
             query: { type: "public" },
             includeLocs: "dist.location",
             uniqueDocs: true,
-            num: 5,
+            num: 10,
             spherical: true
         }
     }
-])
+]);

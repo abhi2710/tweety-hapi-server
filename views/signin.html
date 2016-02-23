@@ -5,40 +5,54 @@
     <title>Title</title>
 </head>
 <body>
-
+<script src="http://maps.googleapis.com/maps/api/js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 <script>
-$(document).ready(function() {
-    $("button").click(function () {
-        $.ajax({
-            type: "POST",
-            url: "http://localhost:8500/user/login",
-            cache:false,
-            data: {
-                username: $("#text1").val(),
-                password: $("#pass1").val()
-            },
-            async: true,
-
-            success: function(data) {
-                console.log(data);
-                alert(data);
-                prompt("dd","ff","gg");
-                //data - response from server
-            },
-//            error: function(xhr){
-//                alert("An error occured: " + xhr.status + " " + xhr.statusText);
-//            }
+    var users;
+    $(document).ready(function() {
+        $( "#one" ).click(function(){
+            $.post("http://localhost:8500/admin/showusersonmap", {authorization:$("#auth").val()},function(data,status){
+                alert("done");
+                users=data;
+            });
+            return true;
         });
-    });
-});
+        google.maps.event.addDomListener(window, 'load', initialize);
+        function initialize() {
+            var mapProp = {
+                center:new google.maps.LatLng(30.7500,76.7800),
+                zoom:3,
+                mapTypeId:google.maps.MapTypeId.ROADMAP
+            };
+            var map=new google.maps.Map(document.getElementById("googleMap"),mapProp);
+            var marker=new google.maps.Marker({
+                position:mapProp.center
+            });
+            marker.setMap(map);
+            google.maps.event.addListener(map, 'click', function(event) {
+                for(key in users) {
+                    var location=new google.maps.LatLng(users[key].location[0],users[key].location[1]);
+                    placeMarker(location,users[key].username);
+                }
+            });
+            function placeMarker(location,username) {
+                var marker = new google.maps.Marker({
+                    position: location,
+                    map: map
+                });
+                var infowindow = new google.maps.InfoWindow({
+                    content: 'username:'+username +
+                    '<br>Latitude: ' + location.lat() +
+                    '<br>Longitude: ' + location.lng()
+                });
+                infowindow.open(map,marker);
+            }
+        }
 
+    });
 </script>
-<div id="div1">abhinav</div>
-<form method="post">
-    <input type="text" name="username" id="text1" placeholder="USER NAME">
-    <input type="password" id="pass1" name="password" placeholder="PASSWORD">
-    <button>login</button>
-</form>
+<input type="text" name="authorization" id="auth" placeholder="token">
+<input type="button" id="one" value="auth">
+<div id="googleMap" style="width:1250px;height:650px;"></div>
 </body>
 </html>

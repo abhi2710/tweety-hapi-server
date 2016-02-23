@@ -23,8 +23,6 @@ var display= function(token,display,username,tweet_id,radius,lat,long,callback) 
             break;
         case 'show nearby users':showNearbyUser(token,radius,lat,long,callback);
             break;
-        default :showUsers(token,callback);
-            break;
     }
 };
 
@@ -245,5 +243,6 @@ module.exports={
     display:display,
     deleteTweet:deleteTweet,
     deleteUser:deleteUser,
-    editUserProfile:editUserProfile
+    editUserProfile:editUserProfile,
+    showUsers:showUsers
 };
