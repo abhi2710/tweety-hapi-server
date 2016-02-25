@@ -48,11 +48,26 @@ var verifyEmail={
     }
 };
 
+var changePassword={
+    method: 'GET',
+    path:'/user/changepassword/{token}/{pass}',
+    handler: function (request, reply) {
+        controller.verificationController.changePassword(request.params.token,request.params.pass,function(err,result){
+            reply(result.response).code(result.statusCode);
+        });
+    },
+    config: {
+        description: 'change password link',
+        notes: 'requires token and new password',
+        tags: ['api']
+    }
+};
+
+
 var Login={
     method: 'POST',
     path:'/user/login',
     handler: function (request, reply) {
-        console.log(request.payload);
         controller.userBaseController.Login(request.payload.username,
             request.payload.password,function(err,result,token){
 
@@ -67,6 +82,26 @@ var Login={
             payload: {
                 username:Joi.string().required(),
                 password:Joi.string().required()
+            }
+        }
+    }
+};
+
+var forgetPassword={
+    method: 'POST',
+    path:'/user/forgetPassword',
+    handler: function (request, reply) {
+        controller.verificationController.forgetPassword(request.payload.email,function(err,result){
+                reply(result.response.message).code(result.statusCode);
+            });
+    },
+    config: {
+        description: 'forget password',
+        notes: 'send a reset password link to the email',
+        tags: ['api'],
+        validate: {
+            payload: {
+                email:Joi.string().required().email()
             }
         }
     }
@@ -92,5 +127,5 @@ var Logout={
     }
 };
 
-module.exports=[Register,verifyEmail,Login,Logout];
+module.exports=[Register,verifyEmail,Login,Logout,forgetPassword,changePassword];
 

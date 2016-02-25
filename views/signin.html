@@ -8,13 +8,28 @@
 <script src="http://maps.googleapis.com/maps/api/js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 <script>
-    var users;
+    var users,nearbyusers,cityCircle;
     $(document).ready(function() {
+        $( "#clear" ).click(function() {
+         alert("under construction!")
+        });
         $( "#one" ).click(function(){
-            $.post("http://localhost:8500/admin/showusersonmap", {authorization:$("#auth").val()},function(data,status){
-                alert("done");
-                users=data;
-            });
+            var a=$("#sel").val();
+            if(a=="nearby") {
+                $.post("http://localhost:8500/admin/shownearbyonmap", {
+                    authorization: $("#auth").val(),
+                    radius:$("#radius").val(),
+                    lat:$("#lat").val(),
+                    long:$("#long").val()
+                }, function (data, status) {
+                    nearbyusers= data;
+                });
+            }
+            else {
+                $.post("http://localhost:8500/admin/showusersonmap", {authorization: $("#auth").val()}, function (data, status) {
+                    users = data;
+                });
+            }
             return true;
         });
         google.maps.event.addDomListener(window, 'load', initialize);
@@ -30,11 +45,33 @@
             });
             marker.setMap(map);
             google.maps.event.addListener(map, 'click', function(event) {
-                for(key in users) {
-                    var location=new google.maps.LatLng(users[key].location[0],users[key].location[1]);
-                    placeMarker(location,users[key].username);
+                if(users) {
+                    for (key in users) {
+                        var location = new google.maps.LatLng(users[key].location[0], users[key].location[1]);
+                        placeMarker(location, users[key].username);
+                    }
+                }
+                else if(nearbyusers) {
+                    displaycircle();
+                    for (key in nearbyusers) {
+                        var location = new google.maps.LatLng(nearbyusers[key].location[0], nearbyusers[key].location[1]);
+                        placeMarker(location, nearbyusers[key].username);
+                    }
                 }
             });
+            function displaycircle() {
+                cityCircle = new google.maps.Circle({
+                    strokeColor: '#FF0000',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: '#FF0000',
+                    fillOpacity: 0.35,
+                    map: map,
+                    center:new google.maps.LatLng(Number($("#lat").val()),Number($("#long").val())),
+                    radius:Number($("#radius").val())/0.00062137
+                });
+
+            }
             function placeMarker(location,username) {
                 var marker = new google.maps.Marker({
                     position: location,
@@ -52,7 +89,15 @@
     });
 </script>
 <input type="text" name="authorization" id="auth" placeholder="token">
-<input type="button" id="one" value="auth">
+<input type="number" name="radius"  id="radius" placeholder="radius in miles">
+<input type="number" name="centrelat"  id="lat" placeholder="Centre latitude">
+<input type="number" name="centrelong"  id="long" placeholder="Centre longitude">
+<select id="sel">
+    <option value="nearby">SHOW NEARBY USERS</option>
+    <option value="allusers" selected>SHOW ALL USERS</option>
+</select>
+<input type="button" id="one" value="Show">
+<input type="button" name="clear button"  id="clear" value="Clear Map">
 <div id="googleMap" style="width:1250px;height:650px;"></div>
 </body>
 </html>

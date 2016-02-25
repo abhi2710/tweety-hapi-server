@@ -34,13 +34,35 @@ var adminhome={
         }
     }
 };
+var showNearby={
+    method: 'POST',
+    path:'/admin/shownearbyonmap',
+    handler: function (request, reply) {
+        controller.CRUDController.showNearbyUsers(request.payload.authorization,request.payload.radius,
+            request.payload.lat,request.payload.long,function(err,result){
+            reply(result.response.data);
+        });
+    },
+    config: {
+        description: 'Home',
+        notes: 'admin home route',
+        tags: ['api'],
+        validate: {
+            payload: {
+                'authorization': Joi.string().required(),
+                'radius': Joi.number().required(),
+                'lat': Joi.number().required(),
+                'long': Joi.number().required()
+            }
+        }
+    }
+};
+
 var showusersonmap={
     method: 'POST',
     path:'/admin/showusersonmap',
     handler: function (request, reply) {
         controller.CRUDController.showUsers(request.payload.authorization,function(err,result){
-           // reply.view('./signin',result);
-            console.log(result);
           reply(result.response.data);
             });
     },
@@ -57,7 +79,7 @@ var showusersonmap={
 };
 
 var editUserProfile={
-    method: 'POST',
+    method: 'PUT',
     path:'/admin/editUserProfile',
     handler: function (request, reply) {
         controller.CRUDController.editUserProfile(request.headers.authorization,request.payload.username,
@@ -84,4 +106,4 @@ var editUserProfile={
     }
 };
 
-module.exports=[adminhome,editUserProfile,showusersonmap];
+module.exports=[adminhome,editUserProfile,showusersonmap,showNearby];

@@ -130,7 +130,7 @@ var register=function(email,username,firstname,lastname,password,phone,lat,long,
         username:username,
         timestamp:Date.now()
     };
-    var token=Jwt.sign(tokenData, privateKey);
+    var token=Jwt.sign(tokenData, privateKey,{ expiresIn: key.KEYS.TOKENEXPIRY });
     var user= {
         email:email,
         username:username,

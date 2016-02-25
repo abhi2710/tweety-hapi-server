@@ -4,6 +4,7 @@
 'use strict';
 //const CONSTANTS = require('./constants');
 const ERROR_MESSAGES = {
+    'TOKEN_EXPIRED':'TOKEN HAS EXPIRED,PLEASE REQUEST A NEW ONE',
     'SOMETHING_WRONG': 'Something went wrong.',
     'BANK_DETAILS_UNAPPROVED': 'Your bank details have not been yet approved.',
     'BANK_DETAILS_MISSING': 'You have not filled your bank details.',
@@ -73,6 +74,8 @@ const ERROR_MESSAGES = {
     'YOU_JOB_COMMIT': 'You already have a committed job.',
     'EMPLOYEE_NOT_AVAILABLE': 'Employee seems to be busy on this job timings now.',
     'ALREADY_FOLLOWED': 'You are already following this user.',
+    'ALREADY_UNFOLLOWED': 'You are already NOT following this user.',
+    'TWEET_EMPTY':'TWEET CANNOT BE EMPTY',
     'JOB_ALREADY_DECLINED': 'You have already declined the job.',
     'APPROVED_PROFILE_ERROR': 'Only under review or declined profile status can be approved.',
     'DECLINE_PROFILE_ERROR': 'Only under review or approved profile status can be declined.',
@@ -100,7 +103,7 @@ const SUCCESS_MESSAGES = {
     'JOB_POST_SUCCESSFUL': 'Job posted successfully.',
     'EMAIL_SENT': 'Email sent successfully.',
     'EMAIL_VERIFIED': 'Email verified successfully.',
-    'PASSWORD_RESET_SUCCESS': 'Password reset successfully.',
+    'PASSWORD_RESET_SUCCESS': 'Password reset successfully,Check your Email for the Reset Link',
     'DETAILS_SUBMITTED': 'Details submitted successfully.',
     'BANK_DETAILS_PENDING': 'Your bank details are being verified.',
     'SUCCESSFULLY_ADDED': 'Successfully added.',

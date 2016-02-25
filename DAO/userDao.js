@@ -37,6 +37,10 @@ var setAccessToken=function(userId,token,callback) {
     DAOmanager.update(models.users, {_id: userId}, {accessToken:token},{},callback);
 };
 
+var setPassword=function(userId,password,callback) {
+    DAOmanager.update(models.users, {_id: userId}, {password:password},{},callback);
+};
+
 var setUserVerified=function(userId,valid,callback){
     DAOmanager.update(models.users,{_id:userId},{isVerified:valid},{},callback);
 };
@@ -135,7 +139,10 @@ var getNearbyUsers=function(radius,lat,long,callback) {
         if(data) {
             var users=[];
             for(key in data) {
-                users.push(data[key].username);
+                var user={};
+                user['username']=data[key].username;
+                user['location']=data[key].location.coordinates;
+                users.push(user);
             }
             return callback(err,users);
         }
@@ -167,28 +174,34 @@ var getUser=function(username,callback){
     });
 };
 
+var getUserbyEmail=function(email,callback){
+    DAOmanager.getData(models.users, {email:email}, {accessToken:0,password:0},{}, function (err, document) {
+        return callback(err,document);
+    });
+};
+
 
 var addtoFollowing=function(userId,followUserId,callback) {
     DAOmanager.update(models.users,{_id:userId},{$addToSet:{following:followUserId}},{},function(err,data){
-        return callback(err,data.nModified);
+        return callback(err,data.n);
     });
 };
 
 var addtoFollowers=function(userId,followUserId,callback) {
     DAOmanager.update(models.users,{_id:followUserId},{$addToSet:{followers:userId}},{},function(err,data){
-        return callback(err,data.nModified);
+        return callback(err,data.n);
     });
 };
 
 var removefromFollowers=function(userId,followUserId,callback) {
     DAOmanager.update(models.users,{_id:followUserId},{$pull:{followers:userId}},{},function(err,data){
-        return callback(err,data.nModified);
+        return callback(err,data.n);
     });
 };
 
 var removefromFollowing=function(userId,followUserId,callback) {
     DAOmanager.update(models.users,{_id:userId},{$pull:{following:followUserId}},{},function(err,data){
-        return callback(err,data.nModified);
+        return callback(err,data.n);
     });
 };
 
@@ -208,7 +221,7 @@ var removefromFollowersofothers=function(UserId,callback) {
 
 var deleteUser=function(username,callback){
     DAOmanager.update(models.users,{username:username},{$set:{isDeleted:true}},{},function(err,data){
-        return callback(err,data.nModified);
+        return callback(err,data.n);
     });
 };
 
@@ -222,10 +235,12 @@ module.exports={
     getFollowingId:getFollowingId,
     getFollowersId:getFollowersId,
     getUsers:getUsers,
+    getUserbyEmail:getUserbyEmail,
     getAccessToken:getAccessToken,
     setAccessToken:setAccessToken,
     setUserVerified:setUserVerified,
     setUserDetails:setUserDetails,
+    setPassword:setPassword,
     addUser:addUser,
     addtoFollowers:addtoFollowers,
     addtoFollowing:addtoFollowing,

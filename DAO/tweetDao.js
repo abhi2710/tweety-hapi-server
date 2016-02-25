@@ -18,7 +18,9 @@ var unlikeTweet=function(tweetId,userId,callback) {
 
 var addTweet=function(userId,data,callback) {
     DAOmanager.setData(models.tweet,data,function (err,doc) {
+        if(doc)
         return callback(err,doc.tweet_text);
+        else return callback(err,null);
     });
 };
 

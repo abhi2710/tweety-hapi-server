@@ -29,13 +29,21 @@ server.route({
     }
 });
 
+server.route({
+    method: '*',
+    path: '/',
+    handler: function (request, reply) {
+        reply.view('./boot/index');
+    }
+});
+
 Routes.forEach(function (api) {
     server.route(api);
 });
 server.views({
-engines:{
-    html:require('handlebars')
-},
+    engines:{
+        html:require('handlebars')
+    },
     relativeTo:__dirname,
     path:'views'
 });

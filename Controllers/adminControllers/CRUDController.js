@@ -244,5 +244,6 @@ module.exports={
     deleteTweet:deleteTweet,
     deleteUser:deleteUser,
     editUserProfile:editUserProfile,
-    showUsers:showUsers
+    showUsers:showUsers,
+    showNearbyUsers:showNearbyUser
 };

@@ -42,6 +42,9 @@ var createErrorResponseMessage=function(err){
             case errorMessages.IMAGE_FORMAT_NOT_SUPPORTED:error.response.message = errorMessages.IMAGE_FORMAT_NOT_SUPPORTED;
                 error.statusCode=400;
                 break;
+            case errorMessages.TWEET_EMPTY:error.response.message = errorMessages.TWEET_EMPTY
+                error.statusCode=400;
+                break;
             default:error.response.message =errorMessages.SOMETHING_WRONG;
                 break;
         }

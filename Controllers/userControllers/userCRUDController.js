@@ -194,7 +194,7 @@ var stopFollowing=function(token,followUsername,callback) {
                                     return callback(err, true);
                                 }
                                 else
-                                    return callback(new Error(errorMessages.ALREADY_FOLLOWED), false)
+                                    return callback(new Error(errorMessages.ALREADY_UNFOLLOWED), false)
                             });
                     else callback(new Error(errorMessages.INVALID_ID),false)
                 });
@@ -444,6 +444,8 @@ var uploadProfilePic=function(token,req,callback) {
                         });
                         file.pipe(newfile);
                         file.on('end', function (err) {
+                            if(err)
+                            console.log(err);
                             callback(null,userId);
                         });
                     }
@@ -455,7 +457,7 @@ var uploadProfilePic=function(token,req,callback) {
             }
         }
     ],function(err) {
-        if (err) {;
+        if (err) {
             return callback(null, util.createErrorResponseMessage(err));
         }
         else {
