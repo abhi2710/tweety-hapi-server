@@ -2,7 +2,8 @@
  * Created by abhinav on 2/1/2016.
  */
 var Joi=require('joi'),
-    controller = require('../../Controllers/index');
+    controller = require('../../Controllers/index'),
+    util=require('../../util');
 
 var adminRegister={
     method: 'POST',
@@ -25,6 +26,9 @@ var adminRegister={
                 password:Joi.string().required(),
                 phone:Joi.number().required(),
                 scope:Joi.string().required().allow('superAdmin','admin')
+            },
+            failAction:function(request,reply,source,error){
+                reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
         }
     }
@@ -48,6 +52,9 @@ var adminLogin={
             payload: {
                 username:Joi.string().required(),
                 password:Joi.string().required()
+            },
+            failAction:function(request,reply,source,error){
+                reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
         }
     }

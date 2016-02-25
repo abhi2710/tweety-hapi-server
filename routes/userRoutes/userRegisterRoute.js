@@ -2,7 +2,8 @@
  * Created by abhinav on 1/25/2016.
  */
 var Joi=require('joi'),
-    controller = require('../../Controllers/index');
+    controller = require('../../Controllers/index'),
+    util=require('../../util');
 
 var Register={
     method: 'POST',
@@ -25,8 +26,11 @@ var Register={
                 lastname:Joi.string().required(),
                 password:Joi.string().required(),
                 phone:Joi.number().required(),
-                latitude:Joi.number(),
-                longitute:Joi.number()
+                latitude:Joi.number().required(),
+                longitute:Joi.number().required()
+            },
+            failAction:function(request,reply,source,error){
+                reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
         }
     }
@@ -82,6 +86,9 @@ var Login={
             payload: {
                 username:Joi.string().required(),
                 password:Joi.string().required()
+            },
+            failAction:function(request,reply,source,error){
+                reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
         }
     }
@@ -102,6 +109,9 @@ var forgetPassword={
         validate: {
             payload: {
                 email:Joi.string().required().email()
+            },
+            failAction:function(request,reply,source,error){
+                reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
         }
     }

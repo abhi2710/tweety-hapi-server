@@ -4,7 +4,8 @@
 var Joi=require('joi'),
     controller = require('../../Controllers/index'),
     multiparty=require('multiparty'),
-    fs=require('fs');
+    fs=require('fs'),
+    util=require('../../util');
 var home={
     method: 'POST',
     path:'/user/home',
@@ -23,9 +24,12 @@ var home={
                 'authorization': Joi.string().required()
             }).options({ allowUnknown: true }),
             payload: {
-                display:Joi.allow('Post Tweet','Tweets','Followers','Following','Users','Follow','Unfollow','Re-Tweet','like tweet','unlike tweet'),
+                display:Joi.allow('Post Tweet','Tweets','Followers','Following','Users','Follow','Unfollow','Re-Tweet','like tweet','unlike tweet').required(),
                 tweet:Joi.string().description("Enter tweet_id for retweeting,liking and unliking"),
                 username:Joi.string()
+            },
+            failAction:function(request,reply,source,error){
+                reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
         }
     }
@@ -57,6 +61,9 @@ var editProfile= {
                 oldpassword: Joi.string().required(),
                 password: Joi.string(),
                 phone: Joi.number()
+            },
+            failAction:function(request,reply,source,error){
+                reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
         }
     }
@@ -86,6 +93,9 @@ var uploadProfilePic={
                 file: Joi.any()
                     .meta({swaggerType: 'file'})
                     .description('json file')
+            },
+            failAction:function(request,reply,source,error){
+                reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
         },
             payload:{

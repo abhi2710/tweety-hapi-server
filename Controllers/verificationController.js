@@ -112,7 +112,10 @@ function isAuth(recievedToken,model,callback){
                 if(err) {
                     callback(new Error(errorMessages.TOKEN_EXPIRED));
                 }
-                else  callback(null,decode.userId);
+                else  if(decode.userId)
+                    callback(null,decode.userId);
+
+                else callback(new Error(errorMessages.USER_NOT_VERIFIED));
             });
 
         }
@@ -135,7 +138,7 @@ function isAuth(recievedToken,model,callback){
             else
                 callback(new Error(errorMessages.ACTION_NO_AUTH));
         },
-        function (token,userId, callback) {
+        function (token,callback) {
             if(token===recievedToken) {
                 callback(null,true);
             }

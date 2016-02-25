@@ -76,7 +76,7 @@ var showTweetsOverTime=function(token,time,startTime,callback){
                             time: {$gte: now, $lt: start}
                         };
                     else
-                        var condition = {
+                         condition = {
                             time: {$gte: start, $lt: now}
                         };
                     dao.tweetDao.getTweetsOverTime(condition,callback);

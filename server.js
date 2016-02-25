@@ -1,7 +1,8 @@
 'use strict';
 var Routes = require('./routes'),
     Plugins = require('./plugins'),
-    mongoose=require('mongoose');
+    mongoose=require('mongoose'),
+    bootstrap=require('./bootstrap');
 const Hapi = require('hapi'),
     server = new Hapi.Server();
 server.connection({
@@ -21,6 +22,7 @@ mongoose.connection.once('connected', function() {
     console.log("Connected to database Tweetydb")
 });
 
+//bootstrap.init();
 server.route({
     method: '*',
     path: '/signin',

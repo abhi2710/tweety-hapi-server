@@ -20,7 +20,7 @@ var getPasswordbyId=function(userId,callback){
 
 var getAccessToken=function(userId,callback){
     DAOmanager.getData(models.users,{_id:userId},{},function(err,document) {
-        if(document.isVerified)
+        if(document&&document.isVerified)
         return callback(err, document.accessToken);
         else
         return callback(new Error(errorMessages.USER_NOT_VERIFIED));

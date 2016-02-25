@@ -79,6 +79,19 @@ var createSuccessResponseMessage=function(route,result){
     }
     return success;
 };
+
+var createJoiErrorResponseMessage=function(error){
+    var err={};
+    var len=error.data.details.length;
+    for(var i=0;i<len;i++) {
+        err[error.data.details[i].context.key]=error.data.details[i].message;
+    }
+    return err;
+};
+
+
 module.exports={
     createErrorResponseMessage:createErrorResponseMessage,
-    createSuccessResponseMessage:createSuccessResponseMessage};
+    createSuccessResponseMessage:createSuccessResponseMessage,
+    createJoiErrorResponseMessage:createJoiErrorResponseMessage
+};
