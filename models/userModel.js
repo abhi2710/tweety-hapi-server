@@ -19,10 +19,10 @@ var userSchema=new mongoose.Schema({
             type: String, enum: ['Point', 'LineString', 'Polygon'], default: 'Point'
         },
         coordinates: [Number]
-    }
+    },
+    dateCreated:{type:Date,default:new Date()}
 });
 
 userSchema.index({ location : '2dsphere' });
 
 module.exports=mongoose.model("users",userSchema);
-

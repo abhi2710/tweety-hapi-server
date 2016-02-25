@@ -8,7 +8,7 @@ module.exports = {
     },
     email: {
         username: "abhinav.miglani.sample@gmail.com",
-        password: "castlesample",
+        password: "castlemiglani",
         accountName: "Abhinav Miglani",
         verifyEmailUrl: "verifyEmail"
     }

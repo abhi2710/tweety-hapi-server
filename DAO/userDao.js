@@ -168,6 +168,28 @@ var getUsers=function(callback) {
     });
 };
 
+var getUsersOverTime=function(condition,callback) {
+    DAOmanager.getallData(models.users,condition, {}, {}, function (err, data) {
+        if(data) {
+            var users=[];
+            for(key in data) {
+                var user={};
+                user['username']=data[key].username;
+                user['location']=data[key].location.coordinates;
+                user['date Registered']=data[key].dateCreated;
+                user['time period start']=condition.dateCreated['$gte'];
+                user['time period end']=condition.dateCreated['$lt'];
+                users.push(user);
+            }
+            return callback(err,users);
+        }
+        else
+            return callback(err,data);
+    });
+};
+
+
+
 var getUser=function(username,callback){
     DAOmanager.getData(models.users, {username:username}, {accessToken:0,password:0},{}, function (err, document) {
         return callback(err,document);
@@ -229,6 +251,7 @@ module.exports={
     getPassword:getPassword,
     getPasswordbyId:getPasswordbyId,
     getUserId:getUserId,
+    getUsersOverTime:getUsersOverTime,
     getUsername:getUsername,
     getFollowers:getFollowers,
     getFollowing:getFollowing,

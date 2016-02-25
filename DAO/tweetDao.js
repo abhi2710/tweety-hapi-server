@@ -52,6 +52,29 @@ var deleteTweet=function(tweet_id,callback) {
 //    });
 //};
 
+var getTweetsOverTime=function(condition,callback) {
+    DAOmanager.getallData(models.tweet,condition, {}, {}, function (err, data) {
+        if(data) {
+            var tweetsArr = [];
+            for (key in data) {
+                var tweet = {};
+                tweet['username'] = data[key].userId.username;
+                tweet['firstname'] = data[key].userId.firstname;
+                tweet['lastname'] = data[key].userId.lastname;
+                tweet['tweet'] = data[key].tweet_text;
+                tweet['time'] = data[key].time;
+                tweet['likes']=data[key].likes;
+                tweet['time period start']=condition.time['$gte'];
+                tweet['time period end']=condition.time['$lt'];
+                tweetsArr.push(tweet)
+            }
+            return callback(err,tweetsArr);
+        }
+        else
+            return callback(err,data);
+    });
+};
+
 var getTweet=function(tweet_id,callback) {
     DAOmanager.getData(models.tweet, {_id:tweet_id},{}, {},function (err,data) {
         if (data)
@@ -97,5 +120,6 @@ module.exports={
     unlikeTweet:unlikeTweet,
     getTweets:getTweets,
     getTweet:getTweet,
+    getTweetsOverTime:getTweetsOverTime,
     deleteTweet:deleteTweet
 };

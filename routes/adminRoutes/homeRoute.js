@@ -9,7 +9,7 @@ var adminhome={
     path:'/admin/home',
     handler: function (request, reply) {
         controller.CRUDController.display(request.headers.authorization,request.payload.Action,request.payload.username,request.payload.tweetId,
-            request.payload.radius,request.payload.latitude,request.payload.longitude,
+            request.payload.radius,request.payload.latitude,request.payload.longitude,request.payload.timePeriod,request.payload.startTime,
             function(err,result){
             reply(result.response).code(result.statusCode);
         });
@@ -24,7 +24,10 @@ var adminhome={
             }).options({ allowUnknown: true }),
             payload: {
                 Action:Joi.allow('show nearby users','Show Users','Delete User','Show User Profile','Delete Tweet',
-                    'Show Tweets of a User'),
+                    'Show Tweets of a User','show registered user over a time period',
+                    'show tweets over a time period'),
+                startTime:Joi.date().iso().description("only ISO 8601 FORMAT (YYYY-MM-DD)"),
+                timePeriod:Joi.allow('year','month','week'),
                 username:Joi.string(),
                 tweetId:Joi.string(),
                 radius:Joi.number().description("distance in miles"),
