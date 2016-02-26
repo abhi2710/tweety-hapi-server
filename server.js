@@ -23,7 +23,7 @@ var dboptions={
     pass:"inter_5_pwd"
 };
 //mongoose.connect('mongodb://localhost/twitter_5');
-mongoose.connect('mongodb://54.173.40.155/twitter_5',dboptions);
+mongoose.connect('mongodb://localhost/twitter_5',dboptions);
 mongoose.connection.once('connected', function() {
     console.log("Connected to database twitter_5")
 });
