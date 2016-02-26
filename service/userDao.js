@@ -1,14 +1,16 @@
-var models=require('../models'),
+var models=require('../models/index'),
     DAOmanager=require('./DAOmanager'),
-    Constants=require('../Config'),
+    Constants=require('../Config/index'),
     errorMessages=Constants.responseMessages.ERROR_MESSAGES;
 
 var getPassword=function(username,callback){
     DAOmanager.getData(models.users,{username:username},{},function(err,document){
-        if(document.isVerified)
+        if(document)
+            if(document.isVerified)
         return callback(err,document.password);
         else
          return callback(new Error(errorMessages.USER_NOT_VERIFIED),null);
+        else return callback(new Error(errorMessages.USER_NOT_FOUND),null);
     });
 };
 
@@ -88,7 +90,9 @@ var getFollowers=function(userId,callback) {
             follower['lastname']=data[key].followers[i].lastname;
             FollowersArr.push(follower);
         }
-        return callback(err,FollowersArr);
+        var users={};
+        users['USERS']=FollowersArr;
+        return callback(err,users);
     });
 };
 
@@ -109,7 +113,9 @@ var getFollowing=function(userId,callback) {
             following['lastname']=data[key].following[i].lastname;
             FollowingArr.push(following);
         }
-        return callback(err,FollowingArr);
+        var users={};
+        users['USERS']=FollowingArr;
+        return callback(err,users);
     });
 };
 
@@ -137,13 +143,8 @@ var getNearbyUsers=function(radius,lat,long,callback) {
         [ [lat,long ] ,radius/3963.2 ]
     }}},{},{},function (err, data) {
         if(data) {
-            var users=[];
-            for(key in data) {
-                var user={};
-                user['username']=data[key].username;
-                user['location']=data[key].location.coordinates;
-                users.push(user);
-            }
+            var users={};
+            users['USERS']=data;
             return callback(err,users);
         }
         else
@@ -152,39 +153,45 @@ var getNearbyUsers=function(radius,lat,long,callback) {
 };
 
 var getUsers=function(callback) {
-    DAOmanager.getallData(models.users,{}, {}, {}, function (err, data) {
-        if(data) {
-            var users=[];
-            for(key in data) {
-                var user={};
-                user['username']=data[key].username;
-                user['location']=data[key].location.coordinates;
-                users.push(user);
-            }
+    DAOmanager.getallData(models.users,{}, {'__v':0,'password':0,'following':0,
+        'isVerified':0,'followers':0,'accessToken':0}, {}, function (err, data) {
+        //if(data) {
+        //    var users=[];
+        //    for(key in data) {
+        //        var user={};
+        //        user['username']=data[key].username;
+        //        user['location']=data[key].location.coordinates;
+        //        users.push(user);
+        //    }
+        //    return callback(err,users);
+        //}
+        //else
+        var users={};
+        users['USERS']=data;
             return callback(err,users);
-        }
-        else
-            return callback(err,data);
     });
 };
 
 var getUsersOverTime=function(condition,callback) {
-    DAOmanager.getallData(models.users,condition, {}, {}, function (err, data) {
-        if(data) {
-            var users=[];
-            for(key in data) {
-                var user={};
-                user['username']=data[key].username;
-                user['location']=data[key].location.coordinates;
-                user['date Registered']=data[key].dateCreated;
-                user['time period start']=condition.dateCreated['$gte'];
-                user['time period end']=condition.dateCreated['$lt'];
-                users.push(user);
-            }
-            return callback(err,users);
-        }
-        else
-            return callback(err,data);
+    DAOmanager.getallData(models.users,condition, {'__v':0,'password':0,'following':0,
+        'isVerified':0,'followers':0,'accessToken':0}, {}, function (err, data) {
+        //if(data) {
+        //    var users=[];
+        //    for(key in data) {
+        //        var user={};
+        //        user['username']=data[key].username;
+        //        user['location']=data[key].location.coordinates;
+        //        user['date Registered']=data[key].dateCreated;
+        //        user['time period start']=condition.dateCreated['$gte'];
+        //        user['time period end']=condition.dateCreated['$lt'];
+        //        users.push(user);
+        //    }
+        //    return callback(err,users);
+        //}
+        //else
+        var users={};
+        users['USERS']=data;
+        return callback(err,users);
     });
 };
 
@@ -204,7 +211,7 @@ var getUserbyEmail=function(email,callback){
 
 
 var addtoFollowing=function(userId,followUserId,callback) {
-    DAOmanager.update(models.users,{_id:userId},{$addToSet:{following:followUserId}},{},function(err,data){
+    DAOmanager.update(models.users,{_id:userId},{$addToSet:{following:followUserId}},{lean:true},function(err,data){
         return callback(err,data.n);
     });
 };

@@ -21,16 +21,24 @@ var Register={
         validate: {
             payload: {
                 email:Joi.string().email().required(),
-                username:Joi.string().required().alphanum().min(3).max(15),
+                username:Joi.string().required().alphanum().min(3).max(15).description("alphanumeric:min lenght=3,max length=15"),
                 firstname:Joi.string().required(),
                 lastname:Joi.string().required(),
                 password:Joi.string().required(),
-                phone:Joi.number().required(),
+                phone:Joi.number().required().description("10 digit without "),
                 latitude:Joi.number().required(),
                 longitute:Joi.number().required()
             },
             failAction:function(request,reply,source,error){
                 reply(util.createJoiErrorResponseMessage(error)).code(400);
+            }
+        },response: {
+            options: {
+                allowUnknown: true
+            },
+            schema: {
+                message: Joi.string().required(),
+                data: Joi.string()
             }
         }
     }
@@ -42,13 +50,20 @@ var verifyEmail={
     handler: function (request, reply) {
         controller.verificationController.verify(request.params.token,function(err,result){
             reply(result.response).code(result.statusCode);
-
         });
     },
     config: {
         description: 'e-mail Verification link',
         notes: 'Returns a sorted array using the method specified passed in the path',
-        tags: ['api']
+        tags: ['api'],response: {
+            options: {
+                allowUnknown: true
+            },
+            schema: {
+                message: Joi.string().required(),
+                data: Joi.string()
+            }
+        }
     }
 };
 
@@ -63,7 +78,16 @@ var changePassword={
     config: {
         description: 'change password link',
         notes: 'requires token and new password',
-        tags: ['api']
+        tags: ['api'],
+        response: {
+            options: {
+                allowUnknown: true
+            },
+            schema: {
+                message: Joi.string().required(),
+                data: Joi.string()
+            }
+        }
     }
 };
 
@@ -75,7 +99,7 @@ var Login={
         controller.userBaseController.Login(request.payload.username,
             request.payload.password,function(err,result,token){
 
-                reply(result.response.message).header("authorization",token).code(result.statusCode);
+                reply(result.response).header("authorization",token).code(result.statusCode);
             });
     },
     config: {
@@ -90,6 +114,18 @@ var Login={
             failAction:function(request,reply,source,error){
                 reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
+        },
+        response: {
+            options: {
+                allowUnknown: true
+            },
+            //headers:Joi.object({
+            //    'authorization': Joi.string().required()
+            //}).options({ allowUnknown: true }),
+            schema: {
+                message: Joi.string().required(),
+                data: Joi.string()
+            }
         }
     }
 };
@@ -99,7 +135,7 @@ var forgetPassword={
     path:'/user/forgetPassword',
     handler: function (request, reply) {
         controller.verificationController.forgetPassword(request.payload.email,function(err,result){
-                reply(result.response.message).code(result.statusCode);
+                reply(result.response).code(result.statusCode);
             });
     },
     config: {
@@ -113,7 +149,15 @@ var forgetPassword={
             failAction:function(request,reply,source,error){
                 reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
+        },response: {
+        options: {
+            allowUnknown: true
+        },
+        schema: {
+            message: Joi.string().required(),
+            data: Joi.string()
         }
+    }
     }
 };
 
@@ -122,7 +166,7 @@ var Logout={
     path:'/user/logout',
     handler: function (request, reply) {
         controller.userBaseController.Logout(request.headers.authorization,function(err,result) {
-            reply(result.response.message).code(result.statusCode);
+            reply(result.response).code(result.statusCode);
         });
     },
     config: {
@@ -133,6 +177,14 @@ var Logout={
             headers:Joi.object({
                 'authorization': Joi.string().required()
             }).options({ allowUnknown: true })
+        },response: {
+            options: {
+                allowUnknown: true
+            },
+            schema: {
+                message: Joi.string().required(),
+                data: Joi.string()
+            }
         }
     }
 };

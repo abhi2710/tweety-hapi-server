@@ -2,12 +2,13 @@
 var Routes = require('./routes'),
     Plugins = require('./plugins'),
     mongoose=require('mongoose'),
-    bootstrap=require('./bootstrap');
+    bootstrap=require('./bootstrap'),
+    PORTS=require('./Config/Constants').PORTS;
 const Hapi = require('hapi'),
     server = new Hapi.Server();
 server.connection({
     host: 'localhost',
-    port: 8500
+    port: PORTS.LIVE
 });
 server.register(Plugins, function (err) {
         if (err) {
@@ -17,17 +18,22 @@ server.register(Plugins, function (err) {
         }
     }
 );
-mongoose.connect('mongodb://localhost/Tweetydb');
+var dboptions={
+    user:"inter_5",
+    pass:"inter_5_pwd"
+};
+//mongoose.connect('mongodb://localhost/twitter_5');
+mongoose.connect('mongodb://54.173.40.155/twitter_5',dboptions);
 mongoose.connection.once('connected', function() {
-    console.log("Connected to database Tweetydb")
+    console.log("Connected to database twitter_5")
 });
 
 //bootstrap.init();
 server.route({
     method: '*',
-    path: '/signin',
+    path: '/admin/map',
     handler: function (request, reply) {
-        reply.view('./signin');
+        reply.view('./map');
     }
 });
 
@@ -35,7 +41,7 @@ server.route({
     method: '*',
     path: '/',
     handler: function (request, reply) {
-        reply.view('./boot/index');
+        reply('Welcome to Tweety');
     }
 });
 

@@ -30,7 +30,15 @@ var adminRegister={
             failAction:function(request,reply,source,error){
                 reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
+        },response: {
+        options: {
+            allowUnknown: true
+        },
+        schema: {
+            message: Joi.string().required(),
+            data: Joi.string()
         }
+    }
     }
 };
 
@@ -41,7 +49,7 @@ var adminLogin={
     handler: function (request, reply) {
         controller.adminBaseController.Login(request.payload.username,
             request.payload.password,function(err,result,token){
-                reply(result.response.message).header("authorization",token).code(result.statusCode);
+                reply(result.response).header("authorization",token).code(result.statusCode);
             });
     },
     config: {
@@ -56,7 +64,15 @@ var adminLogin={
             failAction:function(request,reply,source,error){
                 reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
+        },response: {
+        options: {
+            allowUnknown: true
+        },
+        schema: {
+            message: Joi.string().required(),
+            data: Joi.string()
         }
+    }
     }
 };
 
@@ -65,7 +81,7 @@ var adminLogout={
     path:'/admin/logout',
     handler: function (request, reply) {
         controller.adminBaseController.Logout(request.headers.authorization,function(err,result) {
-            reply(result.response.message).code(result.statusCode);
+            reply(result.response).code(result.statusCode);
         });
     },
     config: {
@@ -76,6 +92,14 @@ var adminLogout={
             headers:Joi.object({
                 'authorization': Joi.string().required()
             }).options({ allowUnknown: true })
+        },response: {
+            options: {
+                allowUnknown: true
+            },
+            schema: {
+                message: Joi.string().required(),
+                data: Joi.string()
+            }
         }
     }
 };

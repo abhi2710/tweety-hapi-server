@@ -5,7 +5,7 @@ var verify = require('./../verificationController'),
     passhash=require('password-hash-and-salt'),
     Jwt = require('jsonwebtoken'),
     Constants=require('../../Config'),
-    dao = require('../../DAO/index'),
+    dao = require('../../service/index'),
     util = require('../../util'),
     async = require('async'),
     key=require('../../Config/Constants'),
@@ -32,16 +32,19 @@ var editProfile=function(token,data,callback) {
             });
         },
         function(userId,callback){
-            dao.userDao.getPassword(userId,function(err,pass) {
-                if (pass===data['oldpassword']) {
-                    console.log("dbpass:"+pass);
-                    console.log("oldpass:"+data['oldpassword']);
-                    dao.userDao.setUserDetails(userId,data,function (err) {
-                        callback(err,userId);
-                    });
-                }
-                else
-                    callback(new Error(errorMessages.INVALID_CREDENTIALS));
+            dao.userDao.getPasswordbyId(userId,function(err,pass) {
+                passhash(data['oldpassword']).verifyAgainst(pass, function(error, verified) {
+                    if(error)
+                        callback(new Error(errorMessages.SOMETHING_WRONG));
+
+                    if(verified) {
+                        dao.userDao.setUserDetails(userId,data,function (err) {
+                            callback(err,userId);
+                        });
+                    }
+                    else
+                        callback(new Error(errorMessages.INVALID_CREDENTIALS),null)
+                });
             });
         },
         function(userId,callback) {

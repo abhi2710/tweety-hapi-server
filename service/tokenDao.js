@@ -2,7 +2,7 @@
  * Created by abhinav on 1/22/2016.
  */
 var async=require('async'),
-    models=require('../models'),
+    models=require('../models/index'),
     DAOmanager=require('./DAOmanager');
 
 var getToken=function(userId,callback){

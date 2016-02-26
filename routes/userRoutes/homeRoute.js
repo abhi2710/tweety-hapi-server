@@ -24,12 +24,48 @@ var home={
                 'authorization': Joi.string().required()
             }).options({ allowUnknown: true }),
             payload: {
-                display:Joi.allow('Post Tweet','Tweets','Followers','Following','Users','Follow','Unfollow','Re-Tweet','like tweet','unlike tweet').required(),
+                display:Joi.allow('Post Tweet','Tweets','Followers','Following','Follow','Unfollow','Re-Tweet','like tweet','unlike tweet').required(),
                 tweet:Joi.string().description("Enter tweet_id for retweeting,liking and unliking"),
                 username:Joi.string()
             },
             failAction:function(request,reply,source,error){
                 reply(util.createJoiErrorResponseMessage(error)).code(400);
+            }
+        },response: {
+            options: {
+                allowUnknown: true
+            },
+            schema: {
+                message: Joi.string().required(),
+                data: Joi.object().keys({
+                    USERS: Joi.array().items([
+                        Joi.object().keys({
+                            _id: Joi.any(),
+                            email: Joi.string().email(),
+                            username: Joi.string(),
+                            firstname: Joi.string(),
+                            lastname: Joi.string(),
+                            phone: Joi.number(),
+                            isDeleted: Joi.boolean(),
+                            location: Joi.object().keys({
+                                type: Joi.string(),
+                                coordinates: Joi.array()
+                            }),
+                            dateCreated: Joi.date()
+                        })]
+                    ),
+                    TWEETS: Joi.array().items([
+                        Joi.object().keys({
+                            username: Joi.string(),
+                            firstname: Joi.string(),
+                            lastname: Joi.string(),
+                            tweet: Joi.string(),
+                            time: Joi.date(),
+                            likes: Joi.array(),
+                            Retweetedfrom: Joi.string()
+                        })
+                    ])
+                })
             }
         }
     }
@@ -65,6 +101,14 @@ var editProfile= {
             failAction:function(request,reply,source,error){
                 reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
+        },response: {
+            options: {
+                allowUnknown: true
+            },
+            schema: {
+                message: Joi.string().required(),
+                data: Joi.string()
+            }
         }
     }
 };
@@ -97,7 +141,15 @@ var uploadProfilePic={
             failAction:function(request,reply,source,error){
                 reply(util.createJoiErrorResponseMessage(error)).code(400);
             }
+        },response: {
+        options: {
+            allowUnknown: true
         },
+        schema: {
+            message: Joi.string().required(),
+            data: Joi.string()
+        }
+    },
             payload:{
                 maxBytes: 20971520000,
                 output: 'stream',

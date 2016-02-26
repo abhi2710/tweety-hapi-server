@@ -1,8 +1,10 @@
 /**
  * Created by abhinav on 2/1/2016.
  */
-var models=require('../models'),
-    DAOmanager=require('./DAOmanager');
+var models=require('../models/index'),
+    DAOmanager=require('./DAOmanager'),
+    Constants=require('../Config/index'),
+    errorMessages=Constants.responseMessages.ERROR_MESSAGES;
 var addAdmin=function(admin,callback){
     DAOmanager.setData (models.admins,admin,callback);
 };
@@ -33,7 +35,9 @@ var getPasswordbyId=function(adminId,callback){
 
 var getAccessToken=function(adminId,callback){
     DAOmanager.getData(models.admins,{_id:adminId},{},function(err,document) {
+        if(document)
         return callback(err, document.accessToken);
+        else return callback(new Error(errorMessages.ACTION_NO_AUTH));
     });
 };
 
@@ -59,24 +63,17 @@ var getAdminIdAndScope=function(adminname,callback){
     });
 };
 
-var getAdminname=function(userId,callback){
-    DAOmanager.getData(models.users, {_id:adminId}, {}, function (err, document) {
-        if(document)
-            return callback(err,document.adminname);
-        else return callback(err,null);
-    });
-};
+//var getAdminname=function(userId,callback){
+//    DAOmanager.getData(models.users, {_id:adminId}, {}, function (err, document) {
+//        if(document)
+//            return callback(err,document.adminname);
+//        else return callback(err,null);
+//    });
+//};
 
 var getUsers=function(callback) {
-    DAOmanager.getallData(models.users,{}, {}, {}, function (err, data) {
-        if(data) {
-            var users=[];
-            for(key in data) {
-                users.push(data[key].username);
-            }
-            return callback(err,users);
-        }
-        else
+    DAOmanager.getallData(models.users,{}, {'__v':0,'password':0,'following':0,
+        'isVerified':0,'followers':0,'accessToken':0}, {}, function (err, data) {
             return callback(err,data);
     });
 };
@@ -85,7 +82,7 @@ module.exports={
     getPassword:getPassword,
     getPasswordbyId:getPasswordbyId,
     getAdminIdAndScope:getAdminIdAndScope,
-    getAdminname:getAdminname,
+    //getAdminname:getAdminname,
     getUsers:getUsers,
     getAccessToken:getAccessToken,
     setAccessToken:setAccessToken,

@@ -198,7 +198,6 @@ exports.findOneAndUpdateData = function (model, conditions, update, options, cal
  */
 exports.getDataWithReference = function (model, query, projection, options, collectionOptions, callback) {
     model.find(query, projection, options).populate(collectionOptions).exec(function (err, data) {
-
         if (err) {
             logger.error("Error Data reference: ", err);
             return callback(err);

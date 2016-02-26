@@ -7,7 +7,7 @@ var async=require('async'),
     Config = require('../Config/email'),
     nodemailer = require("nodemailer"),
     models=require('../models'),
-    dao=require('../DAO'),
+    dao=require('../service'),
     util=require('../util'),
     key=require('../Config/Constants'),
     privateKeypass =key.KEYS.PRIVATEKEY,
@@ -122,17 +122,15 @@ function isAuth(recievedToken,model,callback){
         catch (err) {
             callback(new Error(errorMessages.INVALID_TOKEN), null);
         }
-    },
-        function(userId,callback)
-        {
+    },function(userId,callback) {
             if(model==="user") {
                 dao.userDao.getAccessToken(userId,function(err,token) {
-                    callback(token,userId)
+                    callback(null,token)
                 });
             }
             else if(model==="admin") {
                 dao.adminDao.getAccessToken(userId,function(err,token) {
-                    callback(token,userId)
+                    callback(null,token)
                 });
             }
             else
@@ -142,10 +140,17 @@ function isAuth(recievedToken,model,callback){
             if(token===recievedToken) {
                 callback(null,true);
             }
-            else callback(new Error(errorMessages.ACTION_NO_AUTH));
+            else
+                callback(new Error(errorMessages.ACTION_NO_AUTH));
         }
-    ], function (err, valid) {
-        return callback(null,valid);
+    ], function (err,valid) {
+        if(err) {
+            return callback(new Error(errorMessages.ACTION_NO_AUTH));
+        }
+        else {
+            return callback(null,valid);
+        }
+
     });
 }
 
@@ -174,13 +179,12 @@ var verify=function(recievedToken,callback){
             }
             else callback(err,null)
         }
-    ], function (err,result) {
+    ], function (err) {
         if(err) {
             return callback(null,util.createErrorResponseMessage(err));
         }
         else {
-            result="";
-            return callback(null,util.createSuccessResponseMessage(successMessages.EMAIL_VERIFIED,result));
+            return callback(null,util.createSuccessResponseMessage(successMessages.EMAIL_VERIFIED));
         }
     });
 };

@@ -5,7 +5,7 @@ var sampleJson = require('./Config/sample.json');
 var async = require('async');
 var log4js = require('log4js');
 var logger = log4js.getLogger('[Bootstrap]');
-var DaoManager = require('./DAO/DAOmanager');
+var DaoManager = require('./service/DAOmanager');
 //var constants = require('./Config/constants');
 var models = require('./models');
 function addSampleDataInDb(sampleData, callbackParent) {

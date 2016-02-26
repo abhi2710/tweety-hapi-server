@@ -3,7 +3,10 @@ const KEYS={
     REGISTERPRIVATEKEY:'37LvDSm4XvjYOh9Y',
     TOKENEXPIRY: 7200 //2 hour
 };
-
+const PORTS={
+  LIVE:'8500'
+};
 module.exports={
-    KEYS:KEYS
+    KEYS:KEYS,
+    PORTS:PORTS
 };

@@ -32,7 +32,7 @@ const ERROR_MESSAGES = {
     'UPLOAD_ERROR': 'Error in uploading.',
     'DUPLICATE_ENTRY': 'Duplicate Entry.',
     'INVALID_ID': 'Invalid ID.',
-    'USERNAME_OR_EMAIL_TAKEN':'USERNAME OR EMAIL TAKEN',
+    'USERNAME_OR_EMAIL_TAKEN':'USERNAME OR PHONE NUMBER OR EMAIL TAKEN',
     'USER_NOT_VERIFIED':'User not verified,please check your email',
     'INVALID_REQUEST_ID': 'Invalid request id.',
     'INVALID_CARD_ID': 'Invalid card ID.',
@@ -96,7 +96,8 @@ const ERROR_MESSAGES = {
     'CARD_DELETE_ERROR': "Couldn't delete card, please try again later.",
     'CUSTOMER_DELETE_ERROR': "Couldn't delete account, please try again later.",
     'CARD_DELETE_ONE': "Please set other card as default card to delete this one.",
-    'PAYMENT_ERROR': "Payment fail, please try again later."
+    'PAYMENT_ERROR': "Payment fail, please try again later.",
+    'NOTHING_TO_UPDATE':'Nothing_To_Update'
 };
 const SUCCESS_MESSAGES = {
     'REGISTRATION_SUCCESSFUL': 'You are Registered successfully.',

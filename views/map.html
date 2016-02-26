@@ -8,10 +8,14 @@
 <script src="http://maps.googleapis.com/maps/api/js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 <script>
-    var users,nearbyusers,cityCircle;
+    var users,nearbyusers,cityCircle,mymarkers=[];
     $(document).ready(function() {
         $( "#clear" ).click(function() {
-         alert("under construction!")
+            var len=mymarkers.length;
+            for(var i=0;i<len;i++) {
+                mymarkers[i].setMap(null);
+                cityCircle.setMap(null);
+            }
         });
         $( "#one" ).click(function(){
             var a=$("#sel").val();
@@ -22,12 +26,12 @@
                     lat:$("#lat").val(),
                     long:$("#long").val()
                 }, function (data, status) {
-                    nearbyusers= data;
+                    nearbyusers= data.data;
                 });
             }
             else {
                 $.post("http://localhost:8500/admin/showusersonmap", {authorization: $("#auth").val()}, function (data, status) {
-                    users = data;
+                    users = data.data;
                 });
             }
             return true;
@@ -77,6 +81,7 @@
                     position: location,
                     map: map
                 });
+                mymarkers.push(marker);
                 var infowindow = new google.maps.InfoWindow({
                     content: 'username:'+username +
                     '<br>Latitude: ' + location.lat() +
@@ -97,7 +102,7 @@
     <option value="allusers" selected>SHOW ALL USERS</option>
 </select>
 <input type="button" id="one" value="Show">
-<input type="button" name="clear button"  id="clear" value="Clear Map">
+<input type="button" name="clear button"  id="clear" value="Clear Map" >
 <div id="googleMap" style="width:1250px;height:650px;"></div>
 </body>
 </html>

@@ -3,7 +3,7 @@
  */
 var jwt = require('jsonwebtoken'),
     async=require('async'),
-    dao=require('../../DAO/index'),
+    dao=require('../../service/index'),
     Constants=require('../../Config'),
     util=require('../../util'),
     verify=require('./../verificationController'),
@@ -22,8 +22,6 @@ var display= function(token,display,tweet,username,callback) {
             break;
         case 'Following':showFollowing(token,callback);
             break;
-        case 'Users':showUsers(token,callback);
-            break;
         case 'Follow':startFollowing(token,username,callback);
             break;
         case 'Unfollow':stopFollowing(token,username,callback);
@@ -40,7 +38,7 @@ var display= function(token,display,tweet,username,callback) {
 var likeTweet=function(token,tweet,callback) {
     async.waterfall([
         function(callback) {
-            if(tweet==="")
+            if(!tweet)
                 callback(new Error(errorMessages.WRONG_PARAMETER), null);
             verify.isAuth(token,'user',function(err,isAuthorized) {
                 if (isAuthorized) {
@@ -78,7 +76,7 @@ var likeTweet=function(token,tweet,callback) {
 var unlikeTweet=function(token,tweet,callback) {
     async.waterfall([
         function(callback) {
-            if(tweet==="")
+            if(!tweet)
                 callback(new Error(errorMessages.WRONG_PARAMETER), null);
             verify.isAuth(token,'user',function(err,isAuthorized) {
                 if (isAuthorized) {
@@ -113,7 +111,7 @@ var unlikeTweet=function(token,tweet,callback) {
 var startFollowing=function(token,followUsername,callback) {
     async.waterfall([
         function(callback) {
-            if(followUsername==="")
+            if(!followUsername)
                 callback(new Error(errorMessages.INVALID_ID), null);
             verify.isAuth(token,'user',function(err,isAuthorized) {
                 if (isAuthorized) {
@@ -163,7 +161,7 @@ var startFollowing=function(token,followUsername,callback) {
 var stopFollowing=function(token,followUsername,callback) {
     async.waterfall([
         function(callback) {
-            if(followUsername==="")
+            if(!followUsername)
                 callback(new Error(errorMessages.INVALID_ID), null);
             verify.isAuth(token,'user',function(err,isAuthorized) {
                 if(isAuthorized) {
@@ -210,27 +208,27 @@ var stopFollowing=function(token,followUsername,callback) {
     });
 };
 
-var showUsers=function(token,callback) {
-    async.waterfall([
-        function(callback){
-            verify.isAuth(token,"user",function(err,isAuthorized) {
-                if (isAuthorized) {
-                    dao.userDao.getUsers(callback);
-                }
-                else
-                    callback(new Error(errorMessages.ACTION_NO_AUTH), null);
-            });
-        }
-    ],function(err,data)
-    {
-        if (err) {
-            return callback(null, util.createErrorResponseMessage(err));
-        }
-        else {
-            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE,data));
-        }
-    });
-};
+//var showUsers=function(token,callback) {
+//    async.waterfall([
+//        function(callback){
+//            verify.isAuth(token,"user",function(err,isAuthorized) {
+//                if (isAuthorized) {
+//                    dao.userDao.getUsers(callback);
+//                }
+//                else
+//                    callback(new Error(errorMessages.ACTION_NO_AUTH), null);
+//            });
+//        }
+//    ],function(err,data)
+//    {
+//        if (err) {
+//            return callback(null, util.createErrorResponseMessage(err));
+//        }
+//        else {
+//            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE,data));
+//        }
+//    });
+//};
 
 var showFollowers=function(token,callback) {
     async.waterfall([
@@ -332,6 +330,8 @@ var showTweets=function(token,callback) {
 var ReTweet=function(token,tweet_id,callback) {
     async.waterfall([
         function(callback) {
+            if(!tweet_id)
+            callback(new Error(errorMessages.INVALID_ID));
             verify.isAuth(token,"user", function (err, isAuthorized) {
                 if (isAuthorized) {
                     try {
@@ -365,12 +365,12 @@ var ReTweet=function(token,tweet_id,callback) {
         function(userId,callback){
             dao.tweetDao.addReTweet(userId,tweet_id,callback);
         }
-    ],function(err,tweet) {
+    ],function(err) {
         if (err) {
             return callback(null, util.createErrorResponseMessage(err));
         }
         else {
-            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE,tweet));
+            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE));
         }
     });
 };
@@ -379,6 +379,8 @@ var ReTweet=function(token,tweet_id,callback) {
 var postTweet=function(token,tweet,callback) {
     async.waterfall([
         function(callback) {
+            if(!tweet)
+            callback(new Error(errorMessages.TWEET_EMPTY));
             verify.isAuth(token,"user", function (err, isAuthorized) {
                 if (isAuthorized) {
                     try {
@@ -401,12 +403,12 @@ var postTweet=function(token,tweet,callback) {
             };
             dao.tweetDao.addTweet(userId,data,callback);
         }
-    ],function(err,tweet) {
+    ],function(err) {
         if (err) {
             return callback(null, util.createErrorResponseMessage(err));
         }
         else {
-            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE,tweet));
+            return callback(null, util.createSuccessResponseMessage(successMessages.ACTION_COMPLETE));
         }
     });
 };

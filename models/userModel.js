@@ -8,7 +8,7 @@ var userSchema=new mongoose.Schema({
     firstname:{type:String,required:true},
     lastname:{type:String,required:true},
     password:{type:String,required:true},
-    phone:{type:Number,required:true},
+    phone:{type:Number,required:true,unique:true},
     isVerified:{type:Boolean,required:true,default:false},
     isDeleted:{type:Boolean,required:true,default:false},
     accessToken:{type:String,default:0},
